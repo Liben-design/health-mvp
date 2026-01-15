@@ -9,21 +9,31 @@ st.set_page_config(
 )
 
 # 2. 讀取資料
-try:
-    df = pd.read_csv("health_data.csv")
-    df.fillna("未標示", inplace=True)
-except FileNotFoundError:
+# 使用 st.cache_data 稍微加速重複讀取
+@st.cache_data
+def load_data():
+    try:
+        df = pd.read_csv("health_data.csv")
+        df.fillna("未標示", inplace=True)
+        return df
+    except FileNotFoundError:
+        return None
+
+df = load_data()
+
+if df is None:
     st.error("❌ 找不到資料檔！請確認 health_data.csv 是否在同一個資料夾內。")
     st.stop()
 
 # ==========================================
-#  介面設計：Header & Search
+#  介面設計：Header & Search (仿 YouTube 風格)
 # ==========================================
 
 st.title("💊 台灣合規保健食品資料庫")
 
 with st.container():
     # --- A. 搜尋框 ---
+    # 使用欄位排版讓搜尋框不要太長 (佔 4/5 寬度)
     col1, col2 = st.columns([4, 1])
     with col1:
         keyword = st.text_input(
@@ -32,11 +42,13 @@ with st.container():
             label_visibility="collapsed"
         )
     
-    # --- B. 標籤篩選器 (st.pills) ---
+    # --- B. 標籤篩選器 (Tag Filter) ---
+    # 準備標籤：包含 "全部" 與所有不重複的功效
     all_effects = ["全部"] + sorted(list(df['approved_effect'].unique()))
     
-    st.write("") 
-    # 這裡的 pills 會被下方的 CSS 改造為垂直捲動區塊
+    st.write("") # 增加一點間距
+    
+    # 使用 st.pills (需要 streamlit>=1.40.0)
     selected_effect = st.pills(
         "快速篩選功效",
         options=all_effects,
@@ -48,14 +60,16 @@ with st.container():
 st.divider()
 
 # ==========================================
-#  篩選邏輯
+#  篩選邏輯 (Backend Logic)
 # ==========================================
 
 result = df.copy()
 
+# 1. 標籤篩選
 if selected_effect and selected_effect != "全部":
     result = result[result['approved_effect'] == selected_effect]
 
+# 2. 關鍵字搜尋
 if keyword:
     result = result[
         result['product_name'].str.contains(keyword, case=False) | 
@@ -64,15 +78,12 @@ if keyword:
     ]
 
 # ==========================================
-#  顯示結果區 & CSS 優化 (關鍵修改處)
+#  CSS 樣式注入 (解決排版與捲動問題)
 # ==========================================
 
-st.subheader(f"搜尋結果：共 {len(result)} 筆")
-
-# ↓↓↓↓↓ 這是 Python 函式開始 ↓↓↓↓↓
 st.markdown("""
 <style>
-    /* 1. 優化卡片外觀 */
+    /* 1. 優化卡片外觀 (Expander) */
     .stExpander { 
         border: 1px solid #f0f0f0; 
         border-radius: 12px; 
@@ -80,16 +91,17 @@ st.markdown("""
     }
 
     /* 2. 強制改造 stPills 為垂直捲動容器 */
+    /* 使用 !important 強制覆蓋 Streamlit 原廠設定 */
     div[data-testid="stPills"] {
         display: flex !important;         
-        flex-wrap: wrap !important;       
+        flex-wrap: wrap !important;       /* 核心：強制換行 */
         gap: 8px !important;              
         
         /* 限制高度與捲動設定 */
-        height: 180px !important;         
+        height: 180px !important;         /* 設定固定高度 */
         max-height: 180px !important;     
-        overflow-y: auto !important;      
-        overflow-x: hidden !important;    
+        overflow-y: auto !important;      /* 垂直捲動 */
+        overflow-x: hidden !important;    /* 隱藏水平捲動 */
         
         /* 視覺優化 */
         padding: 12px !important;         
@@ -101,9 +113,10 @@ st.markdown("""
     /* 確保內部的按鈕不會被壓縮 */
     div[data-testid="stPills"] button {
         margin: 0 !important;
+        border-radius: 20px !important; /* 讓按鈕更圓潤 */
     }
 
-    /* 3. 美化捲動條 */
+    /* 3. 美化捲動條 (Scrollbar) */
     div[data-testid="stPills"]::-webkit-scrollbar {
         width: 8px !important;
     }
@@ -119,11 +132,18 @@ st.markdown("""
     }
 </style>
 """, unsafe_allow_html=True)
-# ↑↑↑↑↑ 這是 Python 函式結束（注意有三個引號和括號） ↑↑↑↑↑
+
+# ==========================================
+#  顯示結果區 (Grid Layout)
+# ==========================================
+
+st.subheader(f"搜尋結果：共 {len(result)} 筆")
+
 if len(result) > 100:
     st.warning(f"⚠️ 資料過多（{len(result)} 筆），僅顯示前 100 筆，請縮小搜尋範圍。")
     result = result.head(100)
 
+# 使用 Grid 排版 (每行 2 個)
 cols = st.columns(2)
 
 for index, (idx, row) in enumerate(result.iterrows()):
