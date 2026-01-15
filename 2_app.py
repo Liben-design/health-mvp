@@ -126,4 +126,10 @@ for index, (idx, row) in enumerate(result.iterrows()):
             st.caption(f"廠商：{row['brand']}")
             st.markdown(f"**許可證字號**：`{row['license_id']}`")
             st.info(f"✅ **核准功效**：\n{row['approved_effect']}")
-            st.markdown(f"🧪 **主要成分**：\n{row['
+            st.markdown(f"🧪 **主要成分**：\n{row['key_ingredients']}")
+            
+            search_url = f"https://www.google.com/search?q={row['product_name']}"
+            st.markdown(f"[🔎 Google 搜尋]({search_url})")
+
+st.divider()
+st.caption("本網站僅為資訊彙整 MVP 原型，所有數據以衛生福利部公告為準。")
