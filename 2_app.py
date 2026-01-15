@@ -71,6 +71,7 @@ st.subheader(f"搜尋結果：共 {len(result)} 筆")
 
 # ↓↓↓↓↓ 這裡做了重要的 CSS 修改 ↓↓↓↓↓
 st.markdown("""
+st.markdown("""
 <style>
     /* 1. 優化卡片外觀 */
     .stExpander { 
@@ -79,38 +80,47 @@ st.markdown("""
         box-shadow: 0 4px 6px rgba(0,0,0,0.04); 
     }
 
-    /* 2. 改造 stPills 為垂直捲動容器 */
+    /* 2. 強制改造 stPills 為垂直捲動容器 */
+    /* 使用 !important 強制覆蓋 Streamlit 原廠設定 */
     div[data-testid="stPills"] {
-        display: flex;         /* 啟用彈性盒模型 */
-        flex-wrap: wrap;       /* 讓標籤自動換行 (關鍵！) */
-        gap: 8px;              /* 標籤之間的間距 */
+        display: flex !important;         
+        flex-wrap: wrap !important;       /* 核心：強制換行 */
+        gap: 8px !important;              
         
         /* 限制高度與捲動設定 */
-        max-height: 180px;     /* 約 4.5 行的高度 (一行約 40px) */
-        overflow-y: auto;      /* 超過高度時顯示垂直捲動軸 */
-        overflow-x: hidden;    /* 隱藏水平捲動軸 */
+        height: 180px !important;         /* 設定固定高度 */
+        max-height: 180px !important;     
+        overflow-y: auto !important;      /* 垂直捲動 */
+        overflow-x: hidden !important;    /* 隱藏水平捲動 */
         
         /* 視覺優化 */
-        padding: 10px;         /* 內距，避免文字貼邊 */
-        background-color: rgba(240, 242, 246, 0.3); /* 極淡的灰色背景示意容器範圍 (可選) */
-        border-radius: 8px;    /* 容器圓角 */
+        padding: 12px !important;         
+        background-color: rgba(240, 242, 246, 0.5) !important; /* 加深一點背景色以便辨識 */
+        border-radius: 8px !important;    
+        border: 1px solid #e0e0e0 !important; /* 增加邊框讓範圍更明顯 */
     }
 
-    /* 3. 美化捲動條 (Scrollbar) - 讓它看起來更現代 */
+    /* 確保內部的按鈕不會被壓縮 */
+    div[data-testid="stPills"] button {
+        margin: 0 !important;
+    }
+
+    /* 3. 美化捲動條 (Scrollbar) */
     div[data-testid="stPills"]::-webkit-scrollbar {
-        width: 8px;            /* 捲動條寬度 */
+        width: 8px !important;
     }
     div[data-testid="stPills"]::-webkit-scrollbar-track {
-        background: transparent; 
+        background: transparent !important; 
     }
     div[data-testid="stPills"]::-webkit-scrollbar-thumb {
-        background-color: #d1d5db; /* 捲動條顏色 (淺灰) */
-        border-radius: 4px;    /* 捲動條圓角 */
+        background-color: #d1d5db !important; 
+        border-radius: 4px !important;    
     }
     div[data-testid="stPills"]::-webkit-scrollbar-thumb:hover {
-        background-color: #9ca3af; /* 滑鼠移過去變深灰 */
+        background-color: #9ca3af !important; 
     }
 </style>
+""", unsafe_allow_html=True)
 """, unsafe_allow_html=True)
 # ↑↑↑↑↑ 修改結束 ↑↑↑↑↑
 
