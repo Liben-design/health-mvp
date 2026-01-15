@@ -69,8 +69,7 @@ if keyword:
 
 st.subheader(f"搜尋結果：共 {len(result)} 筆")
 
-# ↓↓↓↓↓ 這裡做了重要的 CSS 修改 ↓↓↓↓↓
-st.markdown("""
+# ↓↓↓↓↓ 這是 Python 函式開始 ↓↓↓↓↓
 st.markdown("""
 <style>
     /* 1. 優化卡片外觀 */
@@ -81,23 +80,22 @@ st.markdown("""
     }
 
     /* 2. 強制改造 stPills 為垂直捲動容器 */
-    /* 使用 !important 強制覆蓋 Streamlit 原廠設定 */
     div[data-testid="stPills"] {
         display: flex !important;         
-        flex-wrap: wrap !important;       /* 核心：強制換行 */
+        flex-wrap: wrap !important;       
         gap: 8px !important;              
         
         /* 限制高度與捲動設定 */
-        height: 180px !important;         /* 設定固定高度 */
+        height: 180px !important;         
         max-height: 180px !important;     
-        overflow-y: auto !important;      /* 垂直捲動 */
-        overflow-x: hidden !important;    /* 隱藏水平捲動 */
+        overflow-y: auto !important;      
+        overflow-x: hidden !important;    
         
         /* 視覺優化 */
         padding: 12px !important;         
-        background-color: rgba(240, 242, 246, 0.5) !important; /* 加深一點背景色以便辨識 */
+        background-color: rgba(240, 242, 246, 0.5) !important; 
         border-radius: 8px !important;    
-        border: 1px solid #e0e0e0 !important; /* 增加邊框讓範圍更明顯 */
+        border: 1px solid #e0e0e0 !important; 
     }
 
     /* 確保內部的按鈕不會被壓縮 */
@@ -105,7 +103,7 @@ st.markdown("""
         margin: 0 !important;
     }
 
-    /* 3. 美化捲動條 (Scrollbar) */
+    /* 3. 美化捲動條 */
     div[data-testid="stPills"]::-webkit-scrollbar {
         width: 8px !important;
     }
@@ -121,9 +119,7 @@ st.markdown("""
     }
 </style>
 """, unsafe_allow_html=True)
-""", unsafe_allow_html=True)
-# ↑↑↑↑↑ 修改結束 ↑↑↑↑↑
-
+# ↑↑↑↑↑ 這是 Python 函式結束（注意有三個引號和括號） ↑↑↑↑↑
 if len(result) > 100:
     st.warning(f"⚠️ 資料過多（{len(result)} 筆），僅顯示前 100 筆，請縮小搜尋範圍。")
     result = result.head(100)
