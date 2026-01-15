@@ -83,22 +83,24 @@ if keyword:
 
 st.markdown("""
 <style>
-    /* 1. 優化卡片外觀 (Expander) */
+    /* 1. 優化卡片外觀 */
     .stExpander { 
         border: 1px solid #f0f0f0; 
         border-radius: 12px; 
         box-shadow: 0 4px 6px rgba(0,0,0,0.04); 
     }
 
-    /* 2. 強制改造 stPills 為垂直捲動容器 */
-    /* 使用 !important 強制覆蓋 Streamlit 原廠設定 */
+    /* 2. 【核彈級解法】使用 :has() 選擇器 */
+    /* 翻譯：找到所有 "stElementContainer"，但前提是它裡面必須包含 "button" */
+    /* 這樣就不會誤傷到標題文字 (MarkdownContainer) */
+    div[data-testid="stElementContainer"]:has(button),
     div[data-testid="stPills"] {
         display: flex !important;         
-        flex-wrap: wrap !important;       /* 核心：強制換行 */
+        flex-wrap: wrap !important;       /* 強制換行 */
         gap: 8px !important;              
         
-        /* 限制高度與捲動設定 */
-        height: 180px !important;         /* 設定固定高度 */
+        /* 高度與捲動設定 */
+        height: 180px !important;         /* 固定高度 */
         max-height: 180px !important;     
         overflow-y: auto !important;      /* 垂直捲動 */
         overflow-x: hidden !important;    /* 隱藏水平捲動 */
@@ -110,25 +112,28 @@ st.markdown("""
         border: 1px solid #e0e0e0 !important; 
     }
 
-    /* 確保內部的按鈕不會被壓縮 */
+    /* 確保裡面的按鈕樣式正常 */
+    div[data-testid="stElementContainer"]:has(button) button,
     div[data-testid="stPills"] button {
         margin: 0 !important;
-        border-radius: 20px !important; /* 讓按鈕更圓潤 */
+        width: auto !important;
+        flex-shrink: 0 !important; /* 防止按鈕被壓扁 */
     }
 
-    /* 3. 美化捲動條 (Scrollbar) */
-    div[data-testid="stPills"]::-webkit-scrollbar {
-        width: 8px !important;
+    /* 3. 美化捲動條 */
+    ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
     }
-    div[data-testid="stPills"]::-webkit-scrollbar-track {
-        background: transparent !important; 
+    ::-webkit-scrollbar-track {
+        background: transparent; 
     }
-    div[data-testid="stPills"]::-webkit-scrollbar-thumb {
-        background-color: #d1d5db !important; 
-        border-radius: 4px !important;    
+    ::-webkit-scrollbar-thumb {
+        background-color: #d1d5db; 
+        border-radius: 4px;    
     }
-    div[data-testid="stPills"]::-webkit-scrollbar-thumb:hover {
-        background-color: #9ca3af !important; 
+    ::-webkit-scrollbar-thumb:hover {
+        background-color: #9ca3af; 
     }
 </style>
 """, unsafe_allow_html=True)
