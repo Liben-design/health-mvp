@@ -3,13 +3,29 @@ import pandas as pd
 
 st.set_page_config(page_title="葉黃素市場分析", page_icon="👁️", layout="wide")
 
+# ==========================================
+# CSS 優化：讓圖片在表格中顯示大一點
+# ==========================================
+st.markdown("""
+<style>
+    /* 調整表格圖片大小 */
+    img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 4px;
+    }
+</style>
+""", unsafe_allow_html=True)
+
 # 讀取資料
 @st.cache_data
 def load_data():
     try:
         df = pd.read_csv("lutein_market_data.csv")
-        # 處理價格欄位 (轉為數字，錯誤則補0)
         df['price'] = pd.to_numeric(df['price'], errors='coerce').fillna(0).astype(int)
+        # 確保有 brand 欄位，如果沒有則補上預設值
+        if 'brand' not in df.columns:
+            df['brand'] = "未標示"
         return df
     except FileNotFoundError:
         return None
@@ -17,26 +33,25 @@ def load_data():
 df = load_data()
 
 if df is None:
-    st.error("❌ 找不到資料！請先執行 1_lutein_scraper.py")
+    st.error("❌ 找不到資料！請先執行 1_lutein_scraper.py 更新資料庫。")
     st.stop()
 
 # ==========================================
 # Header & 數據概況
 # ==========================================
-st.title("👁️ 葉黃素 (Lutein) 產品市場資料庫")
-st.markdown("匯集 **MOMO**、**PChome** 與 **Google** 前 50 名熱搜產品")
+st.title("👁️ 葉黃素 (Lutein) 產品資料庫")
+st.markdown("匯集 **MOMO** 與 **PChome** 即時比價資訊")
 
-# 數據指標
 col1, col2, col3, col4 = st.columns(4)
 with col1:
     st.metric("總收錄產品", f"{len(df)} 項")
 with col2:
-    # 只計算有價格的商品
     avg_price = df[df['price'] > 0]['price'].mean()
     st.metric("市場平均價格", f"${int(avg_price)}")
 with col3:
-    flora_count = df['tags'].str.contains("FloraGLO").sum()
-    st.metric("FloraGLO 認證產品", f"{flora_count} 項")
+    # 統計最多產品的品牌 Top 1
+    top_brand = df['brand'].value_counts().idxmax()
+    st.metric("產品最多品牌", top_brand)
 with col4:
     free_form_count = df['tags'].str.contains("游離型").sum()
     st.metric("標榜「游離型」", f"{free_form_count} 項")
@@ -48,15 +63,14 @@ st.divider()
 # ==========================================
 st.sidebar.header("🔍 篩選條件")
 
-# 平台篩選
-sources = st.sidebar.multiselect("資料來源", df['source'].unique(), default=df['source'].unique())
+keyword = st.sidebar.text_input("搜尋產品名稱或品牌")
+sources = st.sidebar.multiselect("來源平台", df['source'].unique(), default=df['source'].unique())
 
-# 關鍵字搜尋
-keyword = st.sidebar.text_input("搜尋產品名稱")
+# 新增：品牌篩選
+all_brands = ["全部"] + sorted(df['brand'].unique().tolist())
+selected_brand = st.sidebar.selectbox("品牌篩選", all_brands)
 
-# 特殊規格篩選 (使用我們剛剛爬蟲自動打的標籤)
-st.sidebar.subheader("✨ 高價值規格篩選")
-tag_filter = st.sidebar.radio("只想看：", ["全部", "💎FloraGLO 原料", "✅游離型", "➕含有蝦紅素"])
+tag_filter = st.sidebar.radio("規格亮點：", ["全部", "💎FloraGLO 原料", "✅游離型", "➕含有蝦紅素"])
 
 # ==========================================
 # 資料過濾邏輯
@@ -64,7 +78,10 @@ tag_filter = st.sidebar.radio("只想看：", ["全部", "💎FloraGLO 原料", 
 result = df[df['source'].isin(sources)]
 
 if keyword:
-    result = result[result['title'].str.contains(keyword, case=False)]
+    result = result[result['title'].str.contains(keyword, case=False) | result['brand'].str.contains(keyword, case=False)]
+
+if selected_brand != "全部":
+    result = result[result['brand'] == selected_brand]
 
 if tag_filter == "💎FloraGLO 原料":
     result = result[result['tags'].str.contains("FloraGLO", na=False)]
@@ -74,28 +91,49 @@ elif tag_filter == "➕含有蝦紅素":
     result = result[result['tags'].str.contains("蝦紅素", na=False)]
 
 # ==========================================
-# 顯示結果
+# 顯示結果 (圖文並茂版)
 # ==========================================
-st.subheader(f"篩選結果：共 {len(result)} 筆")
+st.subheader(f"搜尋結果：共 {len(result)} 筆")
 
-# 顯示表格模式 (方便比較價格)
-st.dataframe(
-    result[['source', 'title', 'price', 'tags', 'url']],
-    column_config={
-        "source": "來源",
-        "title": "產品名稱",
-        "price": st.column_config.NumberColumn("價格", format="$%d"),
-        "tags": "自動標籤 (規格亮點)",
-        "url": st.column_config.LinkColumn("連結")
-    },
-    use_container_width=True,
-    hide_index=True
-)
+# 模式切換
+view_mode = st.radio("檢視模式", ["📊 表格模式 (快速比價)", "🖼️ 卡片模式 (瀏覽詳情)"], horizontal=True)
 
-# 顯示卡片模式 (Google 結果比較適合這樣看)
-st.subheader("📝 詳細列表")
-for index, row in result.iterrows():
-    with st.expander(f"[{row['source']}] {row['title']} - ${row['price']}"):
-        st.write(f"🏷️ **標籤**: {row['tags']}")
-        st.caption(f"原始資料片段: {str(row['raw_data'])[:100]}...")
-        st.markdown(f"[👉 前往商品頁面]({row['url']})")
+if "表格" in view_mode:
+    # 使用 st.column_config.ImageColumn 來顯示圖片
+    st.data_editor(
+        result[['image_url', 'brand', 'title', 'price', 'tags', 'url']],
+        column_config={
+            "image_url": st.column_config.ImageColumn("圖片", help="產品預覽圖"),
+            "brand": "品牌",
+            "title": "產品名稱",
+            "price": st.column_config.NumberColumn("價格", format="$%d"),
+            "tags": "規格亮點",
+            "url": st.column_config.LinkColumn("購買連結", display_text="前往賣場")
+        },
+        use_container_width=True,
+        hide_index=True,
+        disabled=True # 禁止編輯，只供瀏覽
+    )
+
+else:
+    # 卡片模式 (Grid Layout)
+    cols = st.columns(3) # 每行顯示 3 個
+    for index, (idx, row) in enumerate(result.iterrows()):
+        with cols[index % 3]:
+            with st.container():
+                # 顯示圖片 (如果沒有圖片連結，用預設圖)
+                if row['image_url'] and str(row['image_url']).startswith('http'):
+                    st.image(row['image_url'], use_column_width=True)
+                else:
+                    st.markdown("🖼️ *(無圖片)*")
+                
+                st.markdown(f"**{row['brand']}**")
+                st.markdown(f"[{row['title']}]({row['url']})")
+                st.markdown(f"💰 **${row['price']}**")
+                
+                # 顯示標籤膠囊
+                if row['tags']:
+                    tags = row['tags'].split(" ")
+                    st.markdown(" ".join([f"`{t}`" for t in tags]))
+                
+                st.markdown("---")
