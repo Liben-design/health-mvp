@@ -26,6 +26,7 @@ def load_data():
         # 確保有 brand 欄位，如果沒有則補上預設值
         if 'brand' not in df.columns:
             df['brand'] = "未標示"
+        df['tags'] = df['tags'].fillna("")
         return df
     except FileNotFoundError:
         return None
@@ -133,8 +134,8 @@ else:
                 st.markdown(f"💰 **${row['price']}**")
                 
                 # 顯示標籤膠囊
-                if row['tags']:
-                    tags = row['tags'].split(" ")
+                tags = row['tags'].split(" ") if row['tags'] else []
+                if tags:
                     st.markdown(" ".join([f"`{t}`" for t in tags]))
                 
                 st.markdown("---")
