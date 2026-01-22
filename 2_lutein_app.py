@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 
-st.set_page_config(page_title="葉黃素市場分析", page_icon="👁️", layout="wide")
+st.set_page_config(page_title="VitaGuide 維他嚮導 | 最懂你的保健品顧問", page_icon="🧭", layout="wide")
 
 # ==========================================
 # CSS 優化：讓圖片在表格中顯示大一點
@@ -39,8 +39,8 @@ if df is None:
 # ==========================================
 # Header & 數據概況
 # ==========================================
-st.title("👁️ 葉黃素 (Lutein) 產品資料庫")
-st.markdown("匯集 **MOMO** 與 **PChome** 即時比價資訊")
+st.title("🧭 VitaGuide 維他嚮導")
+st.markdown("帶你穿越保健品迷霧，只買對的，不買貴的。")
 
 col1, col2, col3, col4 = st.columns(4)
 with col1:
@@ -72,6 +72,8 @@ selected_brand = st.sidebar.selectbox("品牌篩選", all_brands)
 
 tag_filter = st.sidebar.radio("規格亮點：", ["全部", "💎FloraGLO 原料", "✅游離型", "➕含有蝦紅素"])
 
+st.sidebar.warning("**⚠️ 免責聲明**：\n\n本平台資訊僅供參考，不代表醫療建議。產品規格與價格以電商平台當下顯示為準。食用前請諮詢專業醫師或藥師。")
+
 # ==========================================
 # 資料過濾邏輯
 # ==========================================
@@ -100,19 +102,18 @@ view_mode = st.radio("檢視模式", ["📊 表格模式 (快速比價)", "🖼�
 
 if "表格" in view_mode:
     # 使用 st.column_config.ImageColumn 來顯示圖片
-    st.data_editor(
+    st.dataframe(
         result[['image_url', 'brand', 'title', 'price', 'tags', 'url']],
         column_config={
-            "image_url": st.column_config.ImageColumn("圖片", help="產品預覽圖"),
+            "image_url": st.column_config.ImageColumn("商品圖", help="產品預覽圖"),
             "brand": "品牌",
             "title": "產品名稱",
             "price": st.column_config.NumberColumn("價格", format="$%d"),
             "tags": "規格亮點",
-            "url": st.column_config.LinkColumn("購買連結", display_text="前往賣場")
+            "url": st.column_config.LinkColumn("前往購買", display_text="前往購買")
         },
         use_container_width=True,
-        hide_index=True,
-        disabled=True # 禁止編輯，只供瀏覽
+        hide_index=True
     )
 
 else:
