@@ -42,8 +42,26 @@ def extract_tags(title):
     if re.search(r"花青素|山桑子|黑醋栗|智利酒果", title):
         tags.append("🫐花青素")
 
-    # 5. 檢驗與認證
-    if re.search(r"SGS|SNQ|國家認證", title, re.IGNORECASE):
+    # 新增：進階複方 (針對情境)
+    if re.search(r"玻尿酸|魚油|DHA", title):
+        tags.append("💧水潤配方")
+    if re.search(r"蝦紅素|黑豆", title):
+        tags.append("🦐舒緩專注")
+    if re.search(r"馬奇莓|山桑子|花青素", title):
+        tags.append("🫐夜視守護")
+
+    # 新增：劑型偵測
+    if re.search(r"膠囊", title):
+        tags.append("💊膠囊")
+    if re.search(r"飲|凍", title):
+        tags.append("🧃飲品/凍")
+
+    # 5. 檢驗與認證 - 更新為具體的
+    if re.search(r"SNQ", title, re.IGNORECASE):
+        tags.append("🏅SNQ認證")
+    if re.search(r"SGS", title, re.IGNORECASE):
+        tags.append("🛡️SGS檢驗")
+    if re.search(r"國家認證", title, re.IGNORECASE):
         tags.append("🛡️獲認證")
 
     # 如果完全沒有標籤，標記為一般
