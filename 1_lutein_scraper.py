@@ -16,14 +16,40 @@ def extract_brand(title):
     # 如果找不到，且標題夠長，暫時用前四個字當品牌
     return title[:4] if len(title) > 4 else "未標示"
 
-def extract_tags(text):
+def extract_tags(title):
     tags = []
-    if not isinstance(text, str): return ""
-    # 關鍵字判斷
-    if re.search(r"游離型|Free form", text, re.IGNORECASE): tags.append("✅游離型")
-    if re.search(r"酯化型|Ester", text, re.IGNORECASE): tags.append("⚠️酯化型")
-    if re.search(r"FloraGLO", text, re.IGNORECASE): tags.append("💎FloraGLO")
-    if "蝦紅素" in text: tags.append("➕蝦紅素")
+    if not isinstance(title, str): return ""
+
+    # 1. 型態 (游離型優於酯化型)
+    if re.search(r"游離型|Free form", title, re.IGNORECASE):
+        tags.append("✅游離型")
+    elif re.search(r"酯化型|Ester", title, re.IGNORECASE):
+        tags.append("⚠️酯化型")
+
+    # 2. 原料 (FloraGLO 為大廠指標)
+    if re.search(r"FloraGLO|Kemin", title, re.IGNORECASE):
+        tags.append("💎FloraGLO")
+    elif re.search(r"Lutemax", title, re.IGNORECASE):
+        tags.append("💎Lutemax")
+
+    # 3. 比例 (10:2 黃金比例)
+    if re.search(r"10[:：]2|10比2", title):
+        tags.append("⚖️10:2比例")
+
+    # 4. 複方 (蝦紅素、花青素)
+    if re.search(r"蝦紅素|藻紅素", title):
+        tags.append("🦐蝦紅素")
+    if re.search(r"花青素|山桑子|黑醋栗|智利酒果", title):
+        tags.append("🫐花青素")
+
+    # 5. 檢驗與認證
+    if re.search(r"SGS|SNQ|國家認證", title, re.IGNORECASE):
+        tags.append("🛡️獲認證")
+
+    # 如果完全沒有標籤，標記為一般
+    if not tags:
+        return ""
+
     return " ".join(tags)
 
 # ==========================================
