@@ -27,6 +27,8 @@ def load_data():
         if 'brand' not in df.columns:
             df['brand'] = "未標示"
         df['tags'] = df['tags'].fillna("")
+        df['unit_price'] = pd.to_numeric(df['unit_price'], errors='coerce').fillna(0)
+        df['total_count'] = pd.to_numeric(df['total_count'], errors='coerce').fillna(0)
         return df
     except FileNotFoundError:
         return None
@@ -73,6 +75,9 @@ selected_brand = st.sidebar.selectbox("品牌篩選", all_brands)
 
 tag_filter = st.sidebar.radio("規格亮點：", ["全部", "💎FloraGLO 原料", "✅游離型", "➕含有蝦紅素"])
 
+# 新增：排序選項
+sort_option = st.sidebar.selectbox("排序方式", ["預設", "價格由低到高", "價格由高到低", "單價由低到高"])
+
 st.sidebar.warning("**⚠️ 免責聲明**：\n\n本平台資訊僅供參考，不代表醫療建議。產品規格與價格以電商平台當下顯示為準。食用前請諮詢專業醫師或藥師。")
 
 # ==========================================
@@ -92,6 +97,14 @@ elif tag_filter == "✅游離型":
     result = result[result['tags'].str.contains("游離型", na=False)]
 elif tag_filter == "➕含有蝦紅素":
     result = result[result['tags'].str.contains("蝦紅素", na=False)]
+
+# 排序邏輯
+if sort_option == "價格由低到高":
+    result = result.sort_values('price')
+elif sort_option == "價格由高到低":
+    result = result.sort_values('price', ascending=False)
+elif sort_option == "單價由低到高":
+    result = result[result['unit_price'] > 0].sort_values('unit_price')
 
 # ==========================================
 # 顯示結果 (圖文並茂版)
@@ -132,10 +145,14 @@ else:
                 st.markdown(f"**{row['brand']}**")
                 st.markdown(f"[{row['title']}]({row['url']})")
                 st.markdown(f"💰 **${row['price']}**")
-                
+
+                # 顯示單價
+                if row['unit_price'] > 0:
+                    st.markdown(f"<span style='color:orange;'>💸 (每顆 ${row['unit_price']:.2f})</span>", unsafe_allow_html=True)
+
                 # 顯示標籤膠囊
                 tags = row['tags'].split(" ") if row['tags'] else []
                 if tags:
                     st.markdown(" ".join([f"`{t}`" for t in tags]))
-                
+
                 st.markdown("---")

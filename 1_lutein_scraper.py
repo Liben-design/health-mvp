@@ -18,6 +18,34 @@ def extract_brand(title):
     # 如果找不到，且標題夠長，暫時用前四個字當品牌
     return title[:4] if len(title) > 4 else "未標示"
 
+def calculate_unit_price(title, price):
+    if not isinstance(title, str): return None, 0
+    unit_count = None
+    bundle_size = 1
+
+    # 提取「單瓶顆數」
+    match = re.search(r'(\d+)\s*[粒顆錠]', title)
+    if match:
+        unit_count = int(match.group(1))
+
+    # 提取「組數」
+    match = re.search(r'(\d+)\s*[入件盒罐包]組?', title)
+    if match:
+        bundle_size = int(match.group(1))
+    else:
+        match = re.search(r'[xX*]\s*(\d+)', title)
+        if match:
+            bundle_size = int(match.group(1))
+
+    if unit_count is not None:
+        total_count = unit_count * bundle_size
+        unit_price = round(price / total_count, 2)
+    else:
+        total_count = None
+        unit_price = 0
+
+    return total_count, unit_price
+
 def extract_tags(text):
     tags = []
     if not isinstance(text, str): return ""
@@ -112,7 +140,9 @@ def scrape_pchome_lutein():
                         image_url = "https://dummyimage.com/200x200/cccccc/ffffff.png&text=No+Image"
 
                     if not pid: continue
-                    
+
+                    total_count, unit_price = calculate_unit_price(name, int(price))
+
                     data_list.append({
                         "source": "PChome",
                         "brand": extract_brand(name),
@@ -122,7 +152,9 @@ def scrape_pchome_lutein():
                         "image_url": image_url,
                         "tags": extract_tags(name),
                         "sales_volume": 0,  # PChome 不提供銷量數據，預設為 0
-                        "raw_data": name
+                        "raw_data": name,
+                        "total_count": total_count,
+                        "unit_price": unit_price
                     })
             time.sleep(1)
     except Exception as e:
@@ -240,6 +272,8 @@ def scrape_momo_lutein(limit=100):
                         combined_text = title + " " + inner_text
                         tags = extract_tags(combined_text)
 
+                        total_count, unit_price = calculate_unit_price(title, price)
+
                         data_list.append({
                             "source": "MOMO",
                             "brand": extract_brand(title),
@@ -249,7 +283,9 @@ def scrape_momo_lutein(limit=100):
                             "image_url": image_url,
                             "tags": tags,
                             "sales_volume": sales_volume,
-                            "raw_data": title
+                            "raw_data": title,
+                            "total_count": total_count,
+                            "unit_price": unit_price
                         })
                         count += 1
                     except Exception as e:
@@ -262,6 +298,8 @@ def scrape_momo_lutein(limit=100):
                             basic_link = item.get_attribute("href") or item.locator("a").first.get_attribute("href")
                             if basic_link and not basic_link.startswith("http"): basic_link = "https://www.momoshop.com.tw" + basic_link
 
+                            total_count, unit_price = calculate_unit_price(basic_title, basic_price)
+
                             data_list.append({
                                 "source": "MOMO",
                                 "brand": extract_brand(basic_title),
@@ -271,7 +309,9 @@ def scrape_momo_lutein(limit=100):
                                 "image_url": "https://dummyimage.com/200x200/cccccc/ffffff.png&text=MOMO+Basic",
                                 "tags": "",
                                 "sales_volume": 0,
-                                "raw_data": basic_title
+                                "raw_data": basic_title,
+                                "total_count": total_count,
+                                "unit_price": unit_price
                             })
                             count += 1
                         except:
