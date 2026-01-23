@@ -2,6 +2,7 @@ import requests
 import pandas as pd
 import time
 import re
+import random
 from playwright.sync_api import sync_playwright
 from bs4 import BeautifulSoup
 
@@ -139,7 +140,7 @@ def scrape_momo_lutein(limit=100):
     with sync_playwright() as p:
         # 1. 啟動參數：移除自動化特徵
         browser = p.chromium.launch(
-            headless=False,
+            headless=True,
             args=['--disable-blink-features=AutomationControlled', '--no-sandbox']
         )
 
@@ -159,6 +160,7 @@ def scrape_momo_lutein(limit=100):
                 print(f"🔗 前往 MOMO 第 {page_num} 頁...")
                 url = f"https://www.momoshop.com.tw/search/searchShop.jsp?keyword=葉黃素&searchType=6&curPage={page_num}"
                 page.goto(url)
+                time.sleep(random.uniform(2, 5))  # 加入隨機延遲
 
                 # 增加載入等待時間
                 try:
@@ -166,10 +168,12 @@ def scrape_momo_lutein(limit=100):
                 except:
                     print("⏳ MOMO 載入較慢，繼續嘗試...")
 
-                # 抓取資料
+                # 抓取資料 - 調整選擇器確保抓到所有商品
                 items = page.locator(".listGoodsData").all()
                 if not items: items = page.locator(".goodsUrl").all()
                 if not items: items = page.locator("li.goodsItemLi").all()
+                if not items: items = page.locator(".EachGood").all()
+                if not items: items = page.locator("#CategoryContent li").all()
 
                 print(f"📦 MOMO 第 {page_num} 頁找到 {len(items)} 個商品...")
 
@@ -177,6 +181,7 @@ def scrape_momo_lutein(limit=100):
                     if count >= limit: break
                     try:
                         title = item.locator(".prdName").first.inner_text()
+                        print(f"   [進度] 正在解析第 {count+1}/{limit} 筆：{title[:10]}...", end="\r")
 
                         price_text = item.locator(".price, .money").first.inner_text()
                         price = int(re.sub(r'[^\d]', '', price_text))
@@ -184,20 +189,27 @@ def scrape_momo_lutein(limit=100):
                         link = item.get_attribute("href") or item.locator("a").first.get_attribute("href")
                         if link and not link.startswith("http"): link = "https://www.momoshop.com.tw" + link
 
-                        # 進入內頁抓取詳細資訊
+                        # 進入內頁抓取詳細資訊 - 使用新分頁避免影響列表頁
                         inner_text = ""
                         if link:
+                            new_page = None
                             try:
-                                res = requests.get(link, timeout=10)
-                                if res.status_code == 200:
-                                    soup = BeautifulSoup(res.text, 'html.parser')
-                                    # 找商品規格或特色描述區塊
-                                    spec_div = soup.find('div', class_='spec') or soup.find('div', class_='description') or soup.find('div', {'id': 'spec'})
-                                    if spec_div:
-                                        inner_text = spec_div.get_text(strip=True)
-                                time.sleep(0.5)  # 避免請求過快
-                            except:
-                                pass
+                                new_page = context.new_page()
+                                new_page.goto(link, timeout=10000)
+                                time.sleep(random.uniform(2, 5))  # 加入隨機延遲
+                                try:
+                                    inner_text = new_page.locator('.spec, .description, #spec').first.inner_text()
+                                except:
+                                    inner_text = ""
+                            except Exception as e:
+                                print(f"❌ 內頁抓取失敗 ({link}): {e}")
+                                inner_text = ""
+                            finally:
+                                if new_page:
+                                    try:
+                                        new_page.close()
+                                    except:
+                                        pass
 
                         # 圖片抓取
                         image_url = None
@@ -214,11 +226,11 @@ def scrape_momo_lutein(limit=100):
 
                         if not image_url: image_url = "https://dummyimage.com/200x200/cccccc/ffffff.png&text=MOMO+No+Img"
 
-                        # 抓取銷量
+                        # 抓取銷量 - 如果抓不到預設為 0
                         sales_volume = 0
                         try:
                             slogan_text = item.locator(".money .slogan").first.inner_text()
-                            match = re.search(r'總銷量>(\d+(?:,\d+)*)', slogan_text)
+                            match = re.search(r'總銷量\D*(\d+(?:,\d+)*)', slogan_text)  # 放寬 Regex
                             if match:
                                 sales_volume = int(match.group(1).replace(',', ''))
                         except:
@@ -240,8 +252,30 @@ def scrape_momo_lutein(limit=100):
                             "raw_data": title
                         })
                         count += 1
-                    except:
-                        continue
+                    except Exception as e:
+                        print(f"❌ 商品抓取失敗: {e}")
+                        # 即使失敗，也嘗試記錄基本資料 (標題、價格)
+                        try:
+                            basic_title = item.locator(".prdName").first.inner_text()
+                            basic_price_text = item.locator(".price, .money").first.inner_text()
+                            basic_price = int(re.sub(r'[^\d]', '', basic_price_text))
+                            basic_link = item.get_attribute("href") or item.locator("a").first.get_attribute("href")
+                            if basic_link and not basic_link.startswith("http"): basic_link = "https://www.momoshop.com.tw" + basic_link
+
+                            data_list.append({
+                                "source": "MOMO",
+                                "brand": extract_brand(basic_title),
+                                "title": basic_title,
+                                "price": basic_price,
+                                "url": basic_link,
+                                "image_url": "https://dummyimage.com/200x200/cccccc/ffffff.png&text=MOMO+Basic",
+                                "tags": "",
+                                "sales_volume": 0,
+                                "raw_data": basic_title
+                            })
+                            count += 1
+                        except:
+                            continue
 
                 time.sleep(1)
 
