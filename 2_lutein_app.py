@@ -22,13 +22,19 @@ st.markdown("""
 def load_data():
     try:
         df = pd.read_csv("lutein_market_data.csv")
+        # 檢查並補齊欄位
+        if 'unit_price' not in df.columns:
+            df['unit_price'] = 0
+        if 'total_count' not in df.columns:
+            df['total_count'] = 1
+        # 原本的轉換邏輯
         df['price'] = pd.to_numeric(df['price'], errors='coerce').fillna(0).astype(int)
         # 確保有 brand 欄位，如果沒有則補上預設值
         if 'brand' not in df.columns:
             df['brand'] = "未標示"
         df['tags'] = df['tags'].fillna("")
         df['unit_price'] = pd.to_numeric(df['unit_price'], errors='coerce').fillna(0)
-        df['total_count'] = pd.to_numeric(df['total_count'], errors='coerce').fillna(0)
+        df['total_count'] = pd.to_numeric(df['total_count'], errors='coerce').fillna(1)
         return df
     except FileNotFoundError:
         return None
