@@ -3,6 +3,7 @@ import pandas as pd
 import time
 import re
 from playwright.sync_api import sync_playwright
+from bs4 import BeautifulSoup
 
 # ==========================================
 # 工具函式
@@ -16,52 +17,52 @@ def extract_brand(title):
     # 如果找不到，且標題夠長，暫時用前四個字當品牌
     return title[:4] if len(title) > 4 else "未標示"
 
-def extract_tags(title):
+def extract_tags(text):
     tags = []
-    if not isinstance(title, str): return ""
+    if not isinstance(text, str): return ""
 
     # 1. 型態 (游離型優於酯化型)
-    if re.search(r"游離型|Free form", title, re.IGNORECASE):
+    if re.search(r"游離型|Free form", text, re.IGNORECASE):
         tags.append("✅游離型")
-    elif re.search(r"酯化型|Ester", title, re.IGNORECASE):
+    elif re.search(r"酯化型|Ester", text, re.IGNORECASE):
         tags.append("⚠️酯化型")
 
     # 2. 原料 (FloraGLO 為大廠指標)
-    if re.search(r"FloraGLO|Kemin", title, re.IGNORECASE):
+    if re.search(r"FloraGLO|Kemin", text, re.IGNORECASE):
         tags.append("💎FloraGLO")
-    elif re.search(r"Lutemax", title, re.IGNORECASE):
+    elif re.search(r"Lutemax", text, re.IGNORECASE):
         tags.append("💎Lutemax")
 
     # 3. 比例 (10:2 黃金比例)
-    if re.search(r"10[:：]2|10比2", title):
+    if re.search(r"10[:：]2|10比2", text):
         tags.append("⚖️10:2比例")
 
     # 4. 複方 (蝦紅素、花青素)
-    if re.search(r"蝦紅素|藻紅素", title):
+    if re.search(r"蝦紅素|藻紅素", text):
         tags.append("🦐蝦紅素")
-    if re.search(r"花青素|山桑子|黑醋栗|智利酒果", title):
+    if re.search(r"花青素|山桑子|黑醋栗|智利酒果", text):
         tags.append("🫐花青素")
 
     # 新增：進階複方 (針對情境)
-    if re.search(r"玻尿酸|魚油|DHA", title):
+    if re.search(r"玻尿酸|魚油|DHA", text):
         tags.append("💧水潤配方")
-    if re.search(r"蝦紅素|黑豆", title):
+    if re.search(r"蝦紅素|黑豆", text):
         tags.append("🦐舒緩專注")
-    if re.search(r"馬奇莓|山桑子|花青素", title):
+    if re.search(r"馬奇莓|山桑子|花青素", text):
         tags.append("🫐夜視守護")
 
     # 新增：劑型偵測
-    if re.search(r"膠囊", title):
+    if re.search(r"膠囊", text):
         tags.append("💊膠囊")
-    if re.search(r"飲|凍", title):
+    if re.search(r"飲|凍", text):
         tags.append("🧃飲品/凍")
 
     # 5. 檢驗與認證 - 更新為具體的
-    if re.search(r"SNQ", title, re.IGNORECASE):
+    if re.search(r"SNQ", text, re.IGNORECASE):
         tags.append("🏅SNQ認證")
-    if re.search(r"SGS", title, re.IGNORECASE):
+    if re.search(r"SGS", text, re.IGNORECASE):
         tags.append("🛡️SGS檢驗")
-    if re.search(r"國家認證", title, re.IGNORECASE):
+    if re.search(r"國家認證", text, re.IGNORECASE):
         tags.append("🛡️獲認證")
 
     # 如果完全沒有標籤，標記為一般
@@ -183,6 +184,21 @@ def scrape_momo_lutein(limit=100):
                         link = item.get_attribute("href") or item.locator("a").first.get_attribute("href")
                         if link and not link.startswith("http"): link = "https://www.momoshop.com.tw" + link
 
+                        # 進入內頁抓取詳細資訊
+                        inner_text = ""
+                        if link:
+                            try:
+                                res = requests.get(link, timeout=10)
+                                if res.status_code == 200:
+                                    soup = BeautifulSoup(res.text, 'html.parser')
+                                    # 找商品規格或特色描述區塊
+                                    spec_div = soup.find('div', class_='spec') or soup.find('div', class_='description') or soup.find('div', {'id': 'spec'})
+                                    if spec_div:
+                                        inner_text = spec_div.get_text(strip=True)
+                                time.sleep(0.5)  # 避免請求過快
+                            except:
+                                pass
+
                         # 圖片抓取
                         image_url = None
                         imgs = item.locator("img").all()
@@ -208,6 +224,10 @@ def scrape_momo_lutein(limit=100):
                         except:
                             pass
 
+                        # 合併 title 和內頁文字用於 extract_tags
+                        combined_text = title + " " + inner_text
+                        tags = extract_tags(combined_text)
+
                         data_list.append({
                             "source": "MOMO",
                             "brand": extract_brand(title),
@@ -215,7 +235,7 @@ def scrape_momo_lutein(limit=100):
                             "price": price,
                             "url": link,
                             "image_url": image_url,
-                            "tags": extract_tags(title),
+                            "tags": tags,
                             "sales_volume": sales_volume,
                             "raw_data": title
                         })
@@ -239,8 +259,8 @@ if __name__ == "__main__":
     # 1. 執行 PChome
     df_p = pd.DataFrame(scrape_pchome_lutein())
     
-    # 2. 執行 MOMO
-    df_m = pd.DataFrame(scrape_momo_lutein())
+    # 2. 執行 MOMO (限制前 30 筆商品)
+    df_m = pd.DataFrame(scrape_momo_lutein(30))
     
     # 3. 合併與存檔
     all_df = pd.concat([df_p, df_m], ignore_index=True)
