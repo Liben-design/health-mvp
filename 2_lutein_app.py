@@ -147,7 +147,7 @@ else:
             with st.container():
                 # 顯示圖片 (如果沒有圖片連結，用預設圖)
                 if row['image_url'] and str(row['image_url']).startswith('http'):
-                    st.image(row['image_url'], use_column_width=True)
+                    st.image(row['image_url'], use_container_width=True)
                 else:
                     st.markdown("🖼️ *(無圖片)*")
                 
