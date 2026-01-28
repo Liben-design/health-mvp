@@ -3,8 +3,14 @@ import pandas as pd
 import time
 import re
 import random
+import os
 from playwright.sync_api import sync_playwright
 from bs4 import BeautifulSoup
+
+# ==========================================
+# 產品清單定義
+# ==========================================
+TARGET_KEYWORDS = ["葉黃素", "益生菌", "魚油"]
 
 # ==========================================
 # 工具函式
@@ -101,14 +107,14 @@ def extract_tags(text):
     return " ".join(tags)
 
 # ==========================================
-# 1. PChome 爬蟲 (修復大小寫敏感問題)
+# 1. PChome 爬蟲 (泛化版)
 # ==========================================
-def scrape_pchome_lutein():
-    print("🚀 [PChome] 開始抓取...")
+def scrape_pchome(keyword):
+    print(f"🚀 [PChome] 開始抓取關鍵字：{keyword}")
     url = "https://ecshweb.pchome.com.tw/search/v3.3/all/results"
-    params = {'q': '葉黃素', 'page': 1, 'sort': 'sale/dc'}
+    params = {'q': keyword, 'page': 1, 'sort': 'sale/dc'}
     data_list = []
-    
+
     try:
         for page in range(1, 4): # 抓前 3 頁
             params['page'] = page
@@ -116,20 +122,20 @@ def scrape_pchome_lutein():
             if res.status_code == 200:
                 products = res.json().get('prods', [])
                 print(f"   📄 PChome 第 {page} 頁抓到 {len(products)} 筆...")
-                
+
                 for p in products:
                     # --- 關鍵修正：同時嘗試大小寫 key ---
                     name = p.get('Name') or p.get('name') or ""
-                    
+
                     # 價格有時候叫 Price, price, 或是 originPrice
                     price = p.get('Price') or p.get('price') or p.get('originPrice') or 0
-                    
+
                     pid = p.get('Id') or p.get('id')
-                    
+
                     # 圖片 key 也可能變
                     img_filename = p.get('PicS') or p.get('picS') or p.get('PicB') or p.get('picB')
                     # --------------------------------
-                    
+
                     if img_filename:
                         # 補上 PChome 圖片網域
                         if img_filename.startswith('http'):
@@ -159,14 +165,14 @@ def scrape_pchome_lutein():
             time.sleep(1)
     except Exception as e:
         print(f"❌ [PChome] 錯誤: {e}")
-        
+
     return data_list
 
 # ==========================================
-# 2. MOMO 爬蟲 (銷量排序版 - 優化效率)
+# 2. MOMO 爬蟲 (泛化版)
 # ==========================================
-def scrape_momo_lutein(limit=100):
-    print("🚀 [MOMO] 啟動隱身瀏覽器 (銷量排序)...")
+def scrape_momo(keyword, limit=100):
+    print(f"🚀 [MOMO] 啟動隱身瀏覽器 (銷量排序) 關鍵字：{keyword}")
     data_list = []
 
     with sync_playwright() as p:
@@ -190,7 +196,7 @@ def scrape_momo_lutein(limit=100):
             for page_num in range(1, 4):  # 只爬前 3 頁
                 if count >= limit: break
                 print(f"🔗 前往 MOMO 第 {page_num} 頁...")
-                url = f"https://www.momoshop.com.tw/search/searchShop.jsp?keyword=葉黃素&searchType=6&curPage={page_num}"
+                url = f"https://www.momoshop.com.tw/search/searchShop.jsp?keyword={keyword}&searchType=6&curPage={page_num}"
                 page.goto(url)
                 time.sleep(random.uniform(2, 5))  # 加入隨機延遲
 
@@ -330,23 +336,34 @@ def scrape_momo_lutein(limit=100):
 # 主程式
 # ==========================================
 if __name__ == "__main__":
-    # 1. 執行 PChome
-    df_p = pd.DataFrame(scrape_pchome_lutein())
-    
-    # 2. 執行 MOMO (限制前 30 筆商品)
-    df_m = pd.DataFrame(scrape_momo_lutein(30))
-    
-    # 3. 合併與存檔
-    all_df = pd.concat([df_p, df_m], ignore_index=True)
-    
-    if not all_df.empty:
-        all_df.to_csv("lutein_market_data.csv", index=False, encoding="utf-8-sig")
-        print("\n✅ 資料合併完成！")
-        print(f"   PChome: {len(df_p)} 筆")
-        print(f"   MOMO:   {len(df_m)} 筆")
-        
-        # 簡單檢查前幾筆 PChome 是否有抓到標題
-        print("\n🔍 資料抽樣檢查 (PChome):")
-        print(df_p[['title', 'price']].head(3))
-    else:
-        print("⚠️ 完全沒抓到資料，請檢查網路或程式碼。")
+    # 建立 data 資料夾
+    os.makedirs("data", exist_ok=True)
+
+    for keyword in TARGET_KEYWORDS:
+        print(f"\n🔍 開始抓取關鍵字：{keyword}")
+        # 1. 執行 PChome
+        df_p = pd.DataFrame(scrape_pchome(keyword))
+
+        # 2. 執行 MOMO (限制前 30 筆商品)
+        df_m = pd.DataFrame(scrape_momo(keyword, 30))
+
+        # 3. 合併與存檔
+        all_df = pd.concat([df_p, df_m], ignore_index=True)
+
+        if not all_df.empty:
+            filename = f"data/{keyword}_data.csv"
+            all_df.to_csv(filename, index=False, encoding="utf-8-sig")
+            print(f"\n✅ {keyword} 資料存檔完成！")
+            print(f"   PChome: {len(df_p)} 筆")
+            print(f"   MOMO:   {len(df_m)} 筆")
+
+            # 簡單檢查前幾筆 PChome 是否有抓到標題
+            print(f"\n🔍 資料抽樣檢查 ({keyword} PChome):")
+            print(df_p[['title', 'price']].head(3))
+        else:
+            print(f"⚠️ {keyword} 完全沒抓到資料，請檢查網路或程式碼。")
+
+        # 關鍵字間延遲，避免對電商平台造成太大瞬間流量
+        if keyword != TARGET_KEYWORDS[-1]:  # 最後一個不需要延遲
+            print(f"⏳ 休息 10 秒後繼續下一個關鍵字...")
+            time.sleep(10)

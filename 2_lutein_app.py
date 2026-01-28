@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 
-st.set_page_config(page_title="VitaGuide 維他嚮導 | 最懂你的保健品顧問", page_icon="🧭", layout="wide")
+st.set_page_config(page_title="Ascent Lab 維他評選指南 | 最懂你的保健品顧問", page_icon="🧭", layout="wide")
 
 # ==========================================
 # CSS 優化：讓圖片在表格中顯示大一點
@@ -19,9 +19,9 @@ st.markdown("""
 
 # 讀取資料
 @st.cache_data
-def load_data():
+def load_data(filename):
     try:
-        df = pd.read_csv("lutein_market_data.csv")
+        df = pd.read_csv(filename)
         # 檢查並補齊欄位
         if 'unit_price' not in df.columns:
             df['unit_price'] = 0
@@ -39,16 +39,24 @@ def load_data():
     except FileNotFoundError:
         return None
 
-df = load_data()
+# ==========================================
+# 側邊欄篩選
+# ==========================================
+st.sidebar.header("🔍 篩選條件")
+
+selected_category = st.sidebar.selectbox("產品類別", ["葉黃素", "益生菌", "魚油"])
+filename = f"data/{selected_category}_data.csv"
+
+df = load_data(filename)
 
 if df is None:
-    st.error("❌ 找不到資料！請先執行 1_lutein_scraper.py 更新資料庫。")
+    st.error(f"目前尚無 {selected_category} 類別資料，請稍後再試。")
     st.stop()
 
 # ==========================================
 # Header & 數據概況
 # ==========================================
-st.title("🧭 VitaGuide 維他嚮導")
+st.title(f"Ascent Lab - {selected_category} 評選指南")
 st.markdown("帶你穿越保健品迷霧，只買對的，不買貴的。")
 
 col1, col2, col3, col4 = st.columns(4)
@@ -66,11 +74,6 @@ with col4:
     st.metric("標榜「游離型」", f"{free_form_count} 項")
 
 st.divider()
-
-# ==========================================
-# 側邊欄篩選
-# ==========================================
-st.sidebar.header("🔍 篩選條件")
 
 keyword = st.sidebar.text_input("搜尋產品名稱或品牌")
 sources = st.sidebar.multiselect("來源平台", df['source'].unique(), default=df['source'].unique())
