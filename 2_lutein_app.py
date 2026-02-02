@@ -17,41 +17,55 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# 讀取資料
+# 讀取資料（優化：兼容多個關鍵字的 CSV 檔案合併讀取，減少重複代碼並支援擴展）
 @st.cache_data
-def load_data(filename):
-    try:
-        df = pd.read_csv(filename)
-        # 檢查並補齊欄位
-        if 'unit_price' not in df.columns:
-            df['unit_price'] = 0
-        if 'total_count' not in df.columns:
-            df['total_count'] = 1
-        # 原本的轉換邏輯
-        df['price'] = pd.to_numeric(df['price'], errors='coerce').fillna(0).astype(int)
-        # 確保有 brand 欄位，如果沒有則補上預設值
-        if 'brand' not in df.columns:
-            df['brand'] = "未標示"
-        df['tags'] = df['tags'].fillna("")
-        df['unit_price'] = pd.to_numeric(df['unit_price'], errors='coerce').fillna(0)
-        df['total_count'] = pd.to_numeric(df['total_count'], errors='coerce').fillna(1)
-        return df
-    except FileNotFoundError:
+def load_data(keywords=["葉黃素", "益生菌", "魚油"]):
+    all_dfs = []
+    for keyword in keywords:
+        filename = f"data/{keyword}_data.csv"
+        try:
+            df = pd.read_csv(filename)
+            # 添加類別欄位方便後續篩選
+            df['category'] = keyword
+            all_dfs.append(df)
+        except FileNotFoundError:
+            print(f"⚠️ 檔案 {filename} 不存在，跳過")
+            continue
+
+    if not all_dfs:
         return None
 
+    # 合併所有資料
+    combined_df = pd.concat(all_dfs, ignore_index=True)
+
+    # 統一處理欄位
+    if 'unit_price' not in combined_df.columns:
+        combined_df['unit_price'] = 0
+    if 'total_count' not in combined_df.columns:
+        combined_df['total_count'] = 1
+
+    combined_df['price'] = pd.to_numeric(combined_df['price'], errors='coerce').fillna(0).astype(int)
+    if 'brand' not in combined_df.columns:
+        combined_df['brand'] = "未標示"
+    combined_df['tags'] = combined_df['tags'].fillna("")
+    combined_df['unit_price'] = pd.to_numeric(combined_df['unit_price'], errors='coerce').fillna(0)
+    combined_df['total_count'] = pd.to_numeric(combined_df['total_count'], errors='coerce').fillna(1)
+
+    return combined_df
+
 # ==========================================
-# 側邊欄篩選
+# 側邊欄篩選（優化：基於合併資料的動態選擇器，提供更全面的產品類別檢視）
 # ==========================================
 st.sidebar.header("🔍 篩選條件")
 
-selected_category = st.sidebar.selectbox("產品類別", ["葉黃素", "益生菌", "魚油"])
-filename = f"data/{selected_category}_data.csv"
-
-df = load_data(filename)
-
+# 載入所有資料
+df = load_data()
 if df is None:
-    st.error(f"目前尚無 {selected_category} 類別資料，請稍後再試。")
+    st.error("目前尚無任何資料，請稍後再試。")
     st.stop()
+
+# 產品類別選擇器（基於合併資料）
+selected_category = st.sidebar.selectbox("產品類別", ["全部"] + sorted(df['category'].unique().tolist()))
 
 # ==========================================
 # Header & 數據概況
@@ -93,6 +107,10 @@ st.sidebar.warning("**⚠️ 免責聲明**：\n\n本平台資訊僅供參考，
 # 資料過濾邏輯
 # ==========================================
 result = df[df['source'].isin(sources)]
+
+# 根據選擇的類別過濾
+if selected_category != "全部":
+    result = result[result['category'] == selected_category]
 
 if keyword:
     result = result[result['title'].str.contains(keyword, case=False) | result['brand'].str.contains(keyword, case=False)]
@@ -145,12 +163,13 @@ else:
     for index, (idx, row) in enumerate(result.iterrows()):
         with cols[index % 3]:
             with st.container():
-                # 顯示圖片 (如果沒有圖片連結，用預設圖)
-                if row['image_url'] and str(row['image_url']).startswith('http'):
+                # 顯示圖片 (優化：若 image_url 為空，顯示質感的預設佔位圖，提升使用者體驗)
+                if row['image_url'] and str(row['image_url']).startswith('http') and 'dummyimage' not in str(row['image_url']):
                     st.image(row['image_url'], use_container_width=True)
                 else:
-                    st.markdown("🖼️ *(無圖片)*")
-                
+                    # 質感預設佔位圖
+                    st.image("https://via.placeholder.com/300x200/e0e0e0/666666?text=商品圖片", use_container_width=True, caption="商品圖片")
+
                 st.markdown(f"**{row['brand']}**")
                 st.markdown(f"[{row['title']}]({row['url']})")
                 st.markdown(f"💰 **${row['price']}**")

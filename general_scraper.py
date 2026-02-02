@@ -4,7 +4,7 @@ import time
 import re
 import random
 import os
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeoutError
 from bs4 import BeautifulSoup
 
 # ==========================================
@@ -12,11 +12,32 @@ from bs4 import BeautifulSoup
 # ==========================================
 TARGET_KEYWORDS = ["葉黃素", "益生菌", "魚油"]
 
+# User-Agent 池：隨機化以降低被封鎖風險
+USER_AGENTS = [
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/121.0",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Safari/605.1.15"
+]
+
 # ==========================================
 # 工具函式
 # ==========================================
+# 品牌白名單：優先匹配這些品牌，避免抓取錯誤標題前綴，提升資料準確性
+BRAND_WHITELIST = [
+    "大研生醫", "營養師輕食", "Swisse", "Nature's Way", "Blackmores", "GNC",
+    "Kemin", "FloraGLO", "Lutemax", "DSM", "BASF", "NOW Foods", "Doctor's Best"
+]
+
 def extract_brand(title):
     if not isinstance(title, str): return "未標示"
+
+    # 優先匹配品牌白名單（大小寫不敏感）
+    for brand in BRAND_WHITELIST:
+        if brand.lower() in title.lower():
+            return brand
+
     # 嘗試抓取 【】 或 [] 裡面的品牌
     match = re.search(r"[【\[](.+?)[】\]]", title)
     if match:
@@ -182,9 +203,10 @@ def scrape_momo(keyword, limit=100):
             args=['--disable-blink-features=AutomationControlled', '--no-sandbox']
         )
 
-        # 2. 設置 User Agent
+        # 2. 設置 User Agent（隨機化以降低被封鎖風險）
+        random_user_agent = random.choice(USER_AGENTS)
         context = browser.new_context(
-            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+            user_agent=random_user_agent
         )
 
         # 3. 注入 JS 隱藏 webdriver 屬性
@@ -228,6 +250,7 @@ def scrape_momo(keyword, limit=100):
                         if link and not link.startswith("http"): link = "https://www.momoshop.com.tw" + link
 
                         # 進入內頁抓取詳細資訊 - 使用新分頁避免影響列表頁
+                        # 增加 try-except 捕捉特定的超時錯誤，確保某一筆資料失敗不影響整體抓取
                         inner_text = ""
                         if link:
                             new_page = None
@@ -239,6 +262,9 @@ def scrape_momo(keyword, limit=100):
                                     inner_text = new_page.locator('.spec, .description, #spec').first.inner_text()
                                 except:
                                     inner_text = ""
+                            except (TimeoutError, PlaywrightTimeoutError) as e:
+                                print(f"⏰ 內頁超時 ({link}): {e} - 跳過此筆，繼續下一筆")
+                                inner_text = ""
                             except Exception as e:
                                 print(f"❌ 內頁抓取失敗 ({link}): {e}")
                                 inner_text = ""
