@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 
-st.set_page_config(page_title="Ascent Lab 維他評選指南 | 最懂你的保健品顧問", page_icon="🧭", layout="wide")
+st.set_page_config(page_title="VITAGUIDE 維他評選指南 | 最懂你的保健品顧問", page_icon="🧭", layout="wide")
 
 # ==========================================
 # CSS 優化：讓圖片在表格中顯示大一點
