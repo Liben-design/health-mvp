@@ -96,7 +96,8 @@ def load_data(keywords=["葉黃素", "益生菌", "魚油"]):
         combined_df[col] = pd.to_numeric(combined_df[col], errors='coerce').fillna(0)
 
     # 補全規格
-    mask = combined_df['total_count'] == 0
+    # 優化：若 total_count 為 0 或 unit_price 為 0，嘗試重新計算 (針對 D2C 資料補強)
+    mask = (combined_df['total_count'] == 0) | (combined_df['unit_price'] == 0)
     if mask.any():
         specs = combined_df.loc[mask].apply(lambda x: calculate_specs_from_title(x['title'], x['price']), axis=1)
         combined_df.loc[mask, 'total_count'] = specs.apply(lambda x: x[0])
@@ -108,10 +109,25 @@ def load_data(keywords=["葉黃素", "益生菌", "魚油"]):
         combined_df['brand'] = combined_df['brand'].fillna("未標示").astype(str)
     combined_df['tags'] = combined_df['tags'].fillna("")
 
-    # 圖片 URL 容錯處理：確保每個產品都有圖片
-    placeholder_img = "https://via.placeholder.com/200x200/e0e0e0/666666?text=Image"
-    combined_df['image_url'] = combined_df['image_url'].fillna(placeholder_img)
-    combined_df['image_url'] = combined_df['image_url'].apply(lambda x: x if str(x).startswith('http') else placeholder_img)
+    # 圖片 URL 容錯處理：確保每個產品都有圖片，並修復 D2C 格式問題
+    placeholder_img = "https://via.placeholder.com/300x200/f8f9fa/6c757d?text=Ascent+Lab+Product"
+    
+    def clean_image_url(url):
+        if pd.isna(url): return placeholder_img
+        s_url = str(url).strip()
+        if not s_url: return placeholder_img
+        
+        # 補全協議 (針對 //imgc.daikenshop.com)
+        if s_url.startswith("//"):
+            s_url = "https:" + s_url
+            
+        # 簡單驗證
+        if not s_url.startswith("http"):
+            return placeholder_img
+            
+        return s_url
+
+    combined_df['image_url'] = combined_df['image_url'].apply(clean_image_url)
 
     return combined_df
 
@@ -232,7 +248,7 @@ else:
                     st.image(row['image_url'], use_container_width=True)
                 else:
                     # 質感預設佔位圖
-                    st.image("https://via.placeholder.com/300x200/e0e0e0/666666?text=商品圖片", use_container_width=True, caption="商品圖片")
+                    st.image("https://via.placeholder.com/300x200/f8f9fa/6c757d?text=Ascent+Lab+Product", use_container_width=True, caption="商品圖片")
 
                 st.markdown(f"**{row['brand']}**")
                 st.markdown(f"[{row['title']}]({row['url']})")
