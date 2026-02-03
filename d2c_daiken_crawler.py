@@ -232,7 +232,7 @@ async def scrape_daiken_all_products():
                     # 抓取整個描述區塊用於分析
                     # 改進：只抓取產品描述相關的區塊，避免抓到頁首頁尾的 "9折", "5包" 等雜訊
                     desc_text = ""
-                    content_selectors = [".product-description", ".detail_content", ".product_detail_content", "div.editor"]
+                    content_selectors = [".product-description", ".detail_content", ".product_detail_content", "div.editor", ".product-intro", ".product-info-main"]
                     
                     for selector in content_selectors:
                         elements = soup.select(selector)
