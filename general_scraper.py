@@ -147,6 +147,8 @@ def scrape_pchome(keyword):
                 for p in products:
                     # --- 關鍵修正：同時嘗試大小寫 key ---
                     name = p.get('Name') or p.get('name') or ""
+                    # 清洗標題，避免 CSV 錯位
+                    name = name.replace(",", " ").replace("\n", " ")
 
                     # 價格有時候叫 Price, price, 或是 originPrice
                     price = p.get('Price') or p.get('price') or p.get('originPrice') or 0
@@ -241,6 +243,8 @@ def scrape_momo(keyword, limit=100):
                     if count >= limit: break
                     try:
                         title = item.locator(".prdName").first.inner_text()
+                        # 清洗標題中的逗號和換行符，避免 CSV 錯位
+                        title = title.replace(",", " ").replace("\n", " ")
                         print(f"   [進度] 正在解析第 {count+1}/{limit} 筆：{title[:10]}...", end="\r")
 
                         price_text = item.locator(".price, .money").first.inner_text()
@@ -288,6 +292,10 @@ def scrape_momo(keyword, limit=100):
                                 if not image_url and "dummy" not in src and "data:image" not in src:
                                     image_url = src
 
+                        # 標準化圖片網址：補上 "https:"
+                        if image_url and image_url.startswith('//'):
+                            image_url = 'https:' + image_url
+                        
                         if not image_url: image_url = "https://dummyimage.com/200x200/cccccc/ffffff.png&text=MOMO+No+Img"
 
                         # 抓取銷量 - 如果抓不到預設為 0
@@ -324,7 +332,7 @@ def scrape_momo(keyword, limit=100):
                         print(f"❌ 商品抓取失敗: {e}")
                         # 即使失敗，也嘗試記錄基本資料 (標題、價格)
                         try:
-                            basic_title = item.locator(".prdName").first.inner_text()
+                            basic_title = item.locator(".prdName").first.inner_text().replace(",", " ").replace("\n", " ")
                             basic_price_text = item.locator(".price, .money").first.inner_text()
                             basic_price = int(re.sub(r'[^\d]', '', basic_price_text))
                             basic_link = item.get_attribute("href") or item.locator("a").first.get_attribute("href")

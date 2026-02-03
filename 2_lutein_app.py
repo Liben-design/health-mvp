@@ -51,6 +51,11 @@ def load_data(keywords=["葉黃素", "益生菌", "魚油"]):
     combined_df['unit_price'] = pd.to_numeric(combined_df['unit_price'], errors='coerce').fillna(0)
     combined_df['total_count'] = pd.to_numeric(combined_df['total_count'], errors='coerce').fillna(1)
 
+    # 圖片 URL 容錯處理：確保每個產品都有圖片
+    placeholder_img = "https://via.placeholder.com/200x200/e0e0e0/666666?text=Image"
+    combined_df['image_url'] = combined_df['image_url'].fillna(placeholder_img)
+    combined_df['image_url'] = combined_df['image_url'].apply(lambda x: x if str(x).startswith('http') else placeholder_img)
+
     return combined_df
 
 # ==========================================
