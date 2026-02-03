@@ -5,6 +5,7 @@ import re
 import random
 import os
 from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeoutError
+from playwright_stealth import stealth_sync
 from bs4 import BeautifulSoup
 
 # ==========================================
@@ -63,19 +64,22 @@ USER_AGENTS = [
 # ==========================================
 DAIKEN_CONFIG = {
     "brand_name": "大研生醫",
-    # 抓取所有保健食品，後續再用關鍵字過濾
-    "product_list_url": "https://www.daiken.com.tw/collections/all-products",
+    "product_list_url": "https://www.daikenshop.com/allgoods.php",
+    # "direct_links": [
+    #     "https://www.daikenshop.com/product.php?code=4710255450081" # 視易適葉黃素
+    # ],
     "selectors": {
-        # 列表頁選擇器
-        "list_item": ".product-item",
-        "product_url": "a.product-item-meta-title",
-        "product_img": ".product-item-img-wrapper img",
-        "product_price": ".price-item--regular",
+        # 列表頁選擇器 (備用)
+        "list_item": ".product-wrap",
+        "list_title": "h3.product-name",
+        "product_url": ".product-image a",
+        "product_img": ".product-image img",
+        "product_price": ".product-price",
         # 詳情頁選擇器
         "details": {
-            "title": ".product-meta__title",
-            "description": ".product-description-container",
-            "ingredients": ".product-info-item.ingredients"
+            "title": "h1.product-name",
+            "description": ".product-description",
+            "ingredients": ".product-description" # 抓取整個描述區塊讓tag提取
         }
     }
 }
@@ -86,41 +90,64 @@ DAIKEN_CONFIG = {
 def scrape_d2c_site(config, keyword_filter, max_retries=2):
     print(f"🚀 [D2C Scraper] 啟動瀏覽器，目標品牌：{config['brand_name']}")
     data_list = []
+    product_links = []
 
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True, args=['--disable-blink-features=AutomationControlled'])
+        browser = p.chromium.launch(headless=True)
         context = browser.new_context(user_agent=random.choice(USER_AGENTS))
-        page = context.new_page()
-        page.add_init_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
-
+        
         try:
-            # 1. 前往產品列表頁
-            print(f"🔗 前往列表頁: {config['product_list_url']}")
-            page.goto(config['product_list_url'], wait_until="domcontentloaded", timeout=60000)
-            
-            # 2. 模擬滾動，載入所有商品
-            print("🔄 模擬滾動以載入所有商品...")
-            for _ in range(5): # 滾動5次以盡可能載入
-                page.mouse.wheel(0, 15000)
-                time.sleep(random.uniform(2, 4))
+            # --- 策略選擇：優先使用直接連結，否則從列表頁發現 ---
+            if "direct_links" in config and config["direct_links"]:
+                print("🎯 使用直接連結模式...")
+                product_links = config["direct_links"]
+            else:
+                print("🧭 使用列表頁發現模式...")
+                page = context.new_page()
+                stealth_sync(page)
 
-            # 3. 抓取所有商品連結
-            all_items = page.locator(config["selectors"]["list_item"]).all()
-            product_links = []
-            for item in all_items:
+                # 1. 前往產品列表頁
+                print(f"🔗 前往列表頁: {config['product_list_url']}")
+                page.goto(config['product_list_url'], wait_until="domcontentloaded", timeout=60000)
                 try:
-                    # 過濾出包含關鍵字的商品
-                    title_text = item.locator('a.product-item-meta-title').inner_text()
-                    if keyword_filter.lower() in title_text.lower():
-                        link = item.locator(config["selectors"]["product_url"]).get_attribute("href")
-                        if link and not link.startswith("http"):
-                            base_url = config['product_list_url'].split('/collections')[0]
-                            link = base_url + link
-                        product_links.append(link)
+                    # 點擊 Cookie 同意按鈕
+                    print("... 正在尋找並點擊 Cookie 同意按鈕 ...")
+                    agree_button = page.locator('text="同意"').first
+                    agree_button.click(timeout=5000)
+                    print("✅ Cookie 同意按鈕已點擊。")
                 except Exception as e:
-                    print(f"⚠️ 列表項目解析錯誤: {e}")
-            
-            print(f"✅ 找到 {len(product_links)} 個符合 '{keyword_filter}' 的商品連結。")
+                    print("ℹ️ 未找到 Cookie 同意按鈕，或點擊時發生錯誤，繼續執行...")
+                
+                print("⏳ 等待產品列表出現...")
+                page.wait_for_selector(config["selectors"]["list_item"], timeout=20000)
+                print("✅ 產品列表已載入。")
+
+                # 2. 模擬滾動，載入所有商品
+                print("🔄 模擬滾動以載入所有商品...")
+                for _ in range(5): # 滾動5次以盡可能載入
+                    page.mouse.wheel(0, 15000)
+                    time.sleep(random.uniform(2, 4))
+
+                # 3. 抓取所有商品連結
+                all_items = page.locator(config["selectors"]["list_item"]).all()
+                print(f"🕵️‍♂️ 找到 {len(all_items)} 個產品項目，開始過濾...")
+                for item in all_items:
+                    try:
+                        # 過濾出包含關鍵字的商品
+                        title_text = item.locator(config["selectors"]["list_title"]).inner_text()
+                        print(f"   - 正在檢查: {title_text.strip()}") # 除錯：印出所有抓到的標題
+                        if keyword_filter.lower() in title_text.lower():
+                            link = item.locator(config["selectors"]["product_url"]).get_attribute("href")
+                            if link and not link.startswith("http"):
+                                base_url = config['product_list_url'].split('/allgoods.php')[0]
+                                link = base_url + "/" + link.lstrip("/")
+                            product_links.append(link)
+                    except Exception as e:
+                        print(f"⚠️ 列表項目解析錯誤: {e}")
+                
+                page.close()
+
+            print(f"✅ 共需抓取 {len(product_links)} 個商品連結。")
 
             # 4. 逐一進入詳情頁抓取
             for i, link in enumerate(product_links):
@@ -131,11 +158,24 @@ def scrape_d2c_site(config, keyword_filter, max_retries=2):
                 for attempt in range(max_retries):
                     detail_page = None
                     try:
+                        # 在每次循環中創建新頁面
                         detail_page = context.new_page()
+                        stealth_sync(detail_page)
+                        
                         detail_page.goto(link, wait_until="domcontentloaded", timeout=30000)
+                        try:
+                            # 點擊 Cookie 同意按鈕
+                            print("... 正在尋找並點擊 Cookie 同意按鈕 ...")
+                            agree_button = detail_page.locator('text="同意"').first
+                            agree_button.click(timeout=5000)
+                            print("✅ Cookie 同意按鈕已點擊。")
+                        except Exception as e:
+                            print("ℹ️ 未找到 Cookie 同意按鈕，或點擊時發生錯誤，繼續執行...")
+                        
                         time.sleep(random.uniform(2, 3))
 
                         # --- 抓取核心數據 ---
+                        detail_page.wait_for_selector(config["selectors"]["details"]["title"], state='visible', timeout=60000)
                         title = detail_page.locator(config["selectors"]["details"]["title"]).inner_text()
                         price_text = detail_page.locator(config["selectors"]["product_price"]).first.inner_text()
                         price = int(re.sub(r'[^\d]', '', price_text))
@@ -144,7 +184,9 @@ def scrape_d2c_site(config, keyword_filter, max_retries=2):
                         description = detail_page.locator(config["selectors"]["details"]["description"]).first.inner_text()
                         ingredients = detail_page.locator(config["selectors"]["details"]["ingredients"]).first.inner_text()
                         
-                        image_url = detail_page.locator(config["selectors"]["product_img"]).first.get_attribute("src")
+                        # 在詳情頁重新抓取圖片，確保是最高畫質
+                        img_element = detail_page.locator(config["selectors"]["product_img"]).first
+                        image_url = img_element.get_attribute("src") or img_element.get_attribute("data-src")
                         if image_url and image_url.startswith('//'):
                             image_url = 'https:' + image_url
 
@@ -169,16 +211,22 @@ def scrape_d2c_site(config, keyword_filter, max_retries=2):
                             "unit_price": unit_price
                         })
                         
-                        detail_page.close()
                         break # 成功，跳出重試循環
 
                     except Exception as e:
                         print(f"      ❌ 第 {attempt+1} 次抓取失敗: {e}")
-                        if detail_page: detail_page.close()
                         if attempt == max_retries - 1:
                             print(f"      ‼️ 無法抓取該頁面，已達最大重試次數，跳過。")
+                            if detail_page:
+                                detail_page.screenshot(path=f"debug_screenshot.png")
                         else:
                             time.sleep(random.uniform(3, 5)) # 等待後重試
+                    finally:
+                        if detail_page:
+                            try:
+                                detail_page.close()
+                            except:
+                                pass # 頁面可能已因錯誤而關閉
 
         except Exception as e:
             print(f"❌ [D2C Scraper] 發生嚴重錯誤: {e}")
@@ -193,7 +241,7 @@ def scrape_d2c_site(config, keyword_filter, max_retries=2):
 # ==========================================
 if __name__ == "__main__":
     # --- 任務設定 ---
-    TARGET_KEYWORD = "葉黃素"
+    TARGET_KEYWORD = "視易適葉黃素"
     
     # 1. 執行 D2C 爬蟲
     d2c_data = scrape_d2c_site(DAIKEN_CONFIG, keyword_filter=TARGET_KEYWORD)
