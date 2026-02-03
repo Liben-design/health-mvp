@@ -1,5 +1,8 @@
 import streamlit as st
 import pandas as pd
+import os
+import glob
+import re
 
 st.set_page_config(page_title="VITAGUIDE 維他評選指南 | 最懂你的保健品顧問", page_icon="🧭", layout="wide")
 
@@ -19,10 +22,44 @@ st.markdown("""
 
 # 讀取資料（優化：兼容多個關鍵字的 CSV 檔案合併讀取，減少重複代碼並支援擴展）
 @st.cache_data
+def calculate_specs_from_title(title, price):
+    """從標題計算規格 (顆數/單位價格)，用於補全 Momo/PChome 資料"""
+    if not isinstance(title, str) or not price or price == 0: return 0, 0.0
+    unit_count, bundle_size = 0, 1
+    
+    # 1. 尋找數量 (30粒, 60顆)
+    match = re.search(r'(\d+)\s*[粒顆錠包]', title)
+    if match: unit_count = int(match.group(1))
+    
+    # 2. 尋找組數 (x3, 3入)
+    match = re.search(r'[xX*]\s*(\d{1,2})\b', title)
+    if match:
+        bundle_size = int(match.group(1))
+    else:
+        match = re.search(r'[\s\uff0c\(\uff08](\d{1,2})\s*[入件組]', title)
+        if match: bundle_size = int(match.group(1))
+        
+    if unit_count > 0:
+        total_count = unit_count * bundle_size
+        unit_price = round(price / total_count, 2) if total_count > 0 else 0
+        return total_count, unit_price
+    return 0, 0.0
+
+def get_category_from_title(title):
+    """從標題推斷產品類別"""
+    if '葉黃素' in title: return '葉黃素'
+    if '魚油' in title: return '魚油'
+    if '益生菌' in title or '乳酸菌' in title: return '益生菌'
+    return '其他'
+
 def load_data(keywords=["葉黃素", "益生菌", "魚油"]):
     all_dfs = []
     for keyword in keywords:
         filename = f"data/{keyword}_data.csv"
+    all_files = glob.glob("data/*.csv")
+    df_list = []
+
+    for filename in all_files:
         try:
             df = pd.read_csv(filename)
             # 添加類別欄位方便後續篩選
@@ -31,22 +68,62 @@ def load_data(keywords=["葉黃素", "益生菌", "魚油"]):
         except FileNotFoundError:
             print(f"⚠️ 檔案 {filename} 不存在，跳過")
             continue
+            
+            # 欄位標準化
+            rename_map = {'product_name': 'title', 'special_price': 'price', 'product_url': 'url'}
+            df = df.rename(columns=rename_map)
+            
+            # 推斷來源
+            if 'source' not in df.columns:
+                if 'daiken' in filename.lower(): df['source'] = '大研生醫官網'
+                elif 'momo' in filename.lower(): df['source'] = 'Momo'
+                elif 'pchome' in filename.lower(): df['source'] = 'PChome'
+                else: df['source'] = 'Other'
+            
+            # 推斷類別
+            if 'd2c_daiken' in filename.lower():
+                df['category'] = df['title'].apply(get_category_from_title)
+            else:
+                for cat in keywords:
+                    if cat in filename:
+                        df['category'] = cat
+                        break
+                else:
+                    if 'category' not in df.columns:
+                        df['category'] = '其他'
+            
+            df_list.append(df)
+        except Exception as e:
+            print(f"⚠️ 檔案 {filename} 讀取失敗: {e}")
 
     if not all_dfs:
         return None
+    if not df_list: return None
+    combined_df = pd.concat(df_list, ignore_index=True)
 
     # 合併所有資料
     combined_df = pd.concat(all_dfs, ignore_index=True)
+    # --- 資料清洗與補全 ---
+    for col in ['price', 'total_count', 'unit_price']:
+        if col not in combined_df.columns: combined_df[col] = 0
+        combined_df[col] = pd.to_numeric(combined_df[col], errors='coerce').fillna(0)
 
     # 統一處理欄位
     if 'unit_price' not in combined_df.columns:
         combined_df['unit_price'] = 0
     if 'total_count' not in combined_df.columns:
         combined_df['total_count'] = 1
+    # 補全規格
+    mask = combined_df['total_count'] == 0
+    if mask.any():
+        specs = combined_df.loc[mask].apply(lambda x: calculate_specs_from_title(x['title'], x['price']), axis=1)
+        combined_df.loc[mask, 'total_count'] = specs.apply(lambda x: x[0])
+        combined_df.loc[mask, 'unit_price'] = specs.apply(lambda x: x[1])
 
     combined_df['price'] = pd.to_numeric(combined_df['price'], errors='coerce').fillna(0).astype(int)
     if 'brand' not in combined_df.columns:
         combined_df['brand'] = "未標示"
+    if 'brand' not in combined_df.columns: combined_df['brand'] = "未標示"
     combined_df['tags'] = combined_df['tags'].fillna("")
     combined_df['unit_price'] = pd.to_numeric(combined_df['unit_price'], errors='coerce').fillna(0)
     combined_df['total_count'] = pd.to_numeric(combined_df['total_count'], errors='coerce').fillna(1)
@@ -65,6 +142,7 @@ st.sidebar.header("🔍 篩選條件")
 
 # 載入所有資料
 df = load_data()
+df = load_data(keywords=["葉黃素", "益生菌", "魚油"])
 if df is None:
     st.error("目前尚無任何資料，請稍後再試。")
     st.stop()
@@ -137,6 +215,9 @@ elif sort_option == "價格由高到低":
     result = result.sort_values('price', ascending=False)
 elif sort_option == "單價由低到高":
     result = result[result['unit_price'] > 0].sort_values('unit_price')
+    df_valid = result[result['unit_price'] > 0].sort_values('unit_price', ascending=True)
+    df_invalid = result[result['unit_price'] == 0]
+    result = pd.concat([df_valid, df_invalid])
 
 # ==========================================
 # 顯示結果 (圖文並茂版)
