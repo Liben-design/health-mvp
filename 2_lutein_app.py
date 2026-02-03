@@ -110,7 +110,7 @@ def load_data(keywords=["葉黃素", "益生菌", "魚油"]):
     combined_df['tags'] = combined_df['tags'].fillna("")
 
     # 圖片 URL 容錯處理：確保每個產品都有圖片，並修復 D2C 格式問題
-    placeholder_img = "https://via.placeholder.com/300x200/f8f9fa/6c757d?text=Ascent+Lab+Product"
+    placeholder_img = "https://via.placeholder.com/300x200/f8f9fa/6c757d?text=VitaGuide"
     
     def clean_image_url(url):
         if pd.isna(url): return placeholder_img
@@ -148,7 +148,7 @@ selected_category = st.sidebar.selectbox("產品類別", ["全部"] + sorted(df[
 # ==========================================
 # Header & 數據概況
 # ==========================================
-st.title(f"Ascent Lab - {selected_category} 評選指南")
+st.title(f"VitaGuide 維他嚮導 - {selected_category} 評選指南")
 st.markdown("帶你穿越保健品迷霧，只買對的，不買貴的。")
 
 col1, col2, col3, col4 = st.columns(4)
@@ -248,7 +248,7 @@ else:
                     st.image(row['image_url'], use_container_width=True)
                 else:
                     # 質感預設佔位圖
-                    st.image("https://via.placeholder.com/300x200/f8f9fa/6c757d?text=Ascent+Lab+Product", use_container_width=True, caption="商品圖片")
+                    st.image("https://via.placeholder.com/300x200/f8f9fa/6c757d?text=VitaGuide", use_container_width=True, caption="商品圖片")
 
                 st.markdown(f"**{row['brand']}**")
                 st.markdown(f"[{row['title']}]({row['url']})")
