@@ -53,21 +53,12 @@ def get_category_from_title(title):
     return '其他'
 
 def load_data(keywords=["葉黃素", "益生菌", "魚油"]):
-    all_dfs = []
-    for keyword in keywords:
-        filename = f"data/{keyword}_data.csv"
     all_files = glob.glob("data/*.csv")
     df_list = []
 
     for filename in all_files:
         try:
             df = pd.read_csv(filename)
-            # 添加類別欄位方便後續篩選
-            df['category'] = keyword
-            all_dfs.append(df)
-        except FileNotFoundError:
-            print(f"⚠️ 檔案 {filename} 不存在，跳過")
-            continue
             
             # 欄位標準化
             rename_map = {'product_name': 'title', 'special_price': 'price', 'product_url': 'url'}
@@ -96,23 +87,14 @@ def load_data(keywords=["葉黃素", "益生菌", "魚油"]):
         except Exception as e:
             print(f"⚠️ 檔案 {filename} 讀取失敗: {e}")
 
-    if not all_dfs:
-        return None
     if not df_list: return None
     combined_df = pd.concat(df_list, ignore_index=True)
 
-    # 合併所有資料
-    combined_df = pd.concat(all_dfs, ignore_index=True)
     # --- 資料清洗與補全 ---
     for col in ['price', 'total_count', 'unit_price']:
         if col not in combined_df.columns: combined_df[col] = 0
         combined_df[col] = pd.to_numeric(combined_df[col], errors='coerce').fillna(0)
 
-    # 統一處理欄位
-    if 'unit_price' not in combined_df.columns:
-        combined_df['unit_price'] = 0
-    if 'total_count' not in combined_df.columns:
-        combined_df['total_count'] = 1
     # 補全規格
     mask = combined_df['total_count'] == 0
     if mask.any():
@@ -120,13 +102,8 @@ def load_data(keywords=["葉黃素", "益生菌", "魚油"]):
         combined_df.loc[mask, 'total_count'] = specs.apply(lambda x: x[0])
         combined_df.loc[mask, 'unit_price'] = specs.apply(lambda x: x[1])
 
-    combined_df['price'] = pd.to_numeric(combined_df['price'], errors='coerce').fillna(0).astype(int)
-    if 'brand' not in combined_df.columns:
-        combined_df['brand'] = "未標示"
     if 'brand' not in combined_df.columns: combined_df['brand'] = "未標示"
     combined_df['tags'] = combined_df['tags'].fillna("")
-    combined_df['unit_price'] = pd.to_numeric(combined_df['unit_price'], errors='coerce').fillna(0)
-    combined_df['total_count'] = pd.to_numeric(combined_df['total_count'], errors='coerce').fillna(1)
 
     # 圖片 URL 容錯處理：確保每個產品都有圖片
     placeholder_img = "https://via.placeholder.com/200x200/e0e0e0/666666?text=Image"
@@ -141,7 +118,6 @@ def load_data(keywords=["葉黃素", "益生菌", "魚油"]):
 st.sidebar.header("🔍 篩選條件")
 
 # 載入所有資料
-df = load_data()
 df = load_data(keywords=["葉黃素", "益生菌", "魚油"])
 if df is None:
     st.error("目前尚無任何資料，請稍後再試。")
@@ -214,7 +190,6 @@ if sort_option == "價格由低到高":
 elif sort_option == "價格由高到低":
     result = result.sort_values('price', ascending=False)
 elif sort_option == "單價由低到高":
-    result = result[result['unit_price'] > 0].sort_values('unit_price')
     df_valid = result[result['unit_price'] > 0].sort_values('unit_price', ascending=True)
     df_invalid = result[result['unit_price'] == 0]
     result = pd.concat([df_valid, df_invalid])
