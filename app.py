@@ -2,12 +2,36 @@ import streamlit as st
 import pandas as pd
 import os
 import glob
+import re
 
 # --- 頁面設定 ---
 st.set_page_config(page_title="大研生醫產品儀表板", layout="wide")
 
 # --- 資料載入與快取 ---
 @st.cache_data
+def calculate_specs_from_title(title, price):
+    """從標題計算規格 (顆數/單位價格)，用於補全 Momo/PChome 資料"""
+    if not isinstance(title, str) or not price: return 0, 0.0
+    unit_count, bundle_size = 0, 1
+    
+    # 1. 尋找數量 (30粒, 60顆)
+    match = re.search(r'(\d+)\s*[粒顆錠包]', title)
+    if match: unit_count = int(match.group(1))
+    
+    # 2. 尋找組數 (x3, 3入)
+    match = re.search(r'[xX*]\s*(\d{1,2})\b', title)
+    if match:
+        bundle_size = int(match.group(1))
+    else:
+        match = re.search(r'[\s\uff0c\(\uff08](\d{1,2})\s*[入件組]', title)
+        if match: bundle_size = int(match.group(1))
+        
+    if unit_count > 0:
+        total_count = unit_count * bundle_size
+        unit_price = round(price / total_count, 2) if total_count > 0 else 0
+        return total_count, unit_price
+    return 0, 0.0
+
 def load_data(folder_path):
     """從資料夾載入所有 CSV 並合併 (包含大研官網、Momo、PChome)"""
     all_files = glob.glob(os.path.join(folder_path, "*.csv"))
@@ -41,6 +65,18 @@ def load_data(folder_path):
             for col in ['price', 'total_count', 'unit_price']:
                 if col in df.columns:
                     df[col] = pd.to_numeric(df[col], errors='coerce').fillna(0)
+            
+            # 補全規格資料 (針對 Momo/PChome 等可能缺漏的來源)
+            if 'total_count' not in df.columns:
+                df['total_count'] = 0
+                df['unit_price'] = 0.0
+            
+            # 對於 total_count 為 0 的資料，嘗試從標題計算
+            mask = df['total_count'] == 0
+            if mask.any():
+                specs = df.loc[mask].apply(lambda x: calculate_specs_from_title(x['title'], x['price']), axis=1)
+                df.loc[mask, 'total_count'] = specs.apply(lambda x: x[0])
+                df.loc[mask, 'unit_price'] = specs.apply(lambda x: x[1])
             
             df_list.append(df)
         except Exception as e:
@@ -90,12 +126,24 @@ df = load_data('data')
 
 if not df.empty:
     # 側邊欄篩選：讓使用者可以選擇要看哪個平台的資料
-    st.sidebar.header("篩選條件")
+    st.sidebar.header("篩選與排序")
     if 'source' in df.columns:
         sources = list(df['source'].unique())
         selected_sources = st.sidebar.multiselect("選擇來源平台", sources, default=sources)
         if selected_sources:
             df = df[df['source'].isin(selected_sources)]
+            
+    # 排序功能
+    sort_by = st.sidebar.selectbox("排序方式", ["預設", "價格 (低 -> 高)", "價格 (高 -> 低)", "CP值 (每單位價格低 -> 高)"])
+    if sort_by == "價格 (低 -> 高)":
+        df = df.sort_values("price", ascending=True)
+    elif sort_by == "價格 (高 -> 低)":
+        df = df.sort_values("price", ascending=False)
+    elif sort_by == "CP值 (每單位價格低 -> 高)":
+        # 排除單位價格為 0 的資料 (無法計算 CP 值)
+        df_valid = df[df['unit_price'] > 0].sort_values("unit_price", ascending=True)
+        df_invalid = df[df['unit_price'] == 0]
+        df = pd.concat([df_valid, df_invalid])
 
     # 建立分類標籤頁
     tab1, tab2, tab3 = st.tabs(["葉黃素系列", "魚油系列", "益生菌系列"])
