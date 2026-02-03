@@ -102,7 +102,10 @@ def load_data(keywords=["葉黃素", "益生菌", "魚油"]):
         combined_df.loc[mask, 'total_count'] = specs.apply(lambda x: x[0])
         combined_df.loc[mask, 'unit_price'] = specs.apply(lambda x: x[1])
 
-    if 'brand' not in combined_df.columns: combined_df['brand'] = "未標示"
+    if 'brand' not in combined_df.columns:
+        combined_df['brand'] = "未標示"
+    else:
+        combined_df['brand'] = combined_df['brand'].fillna("未標示").astype(str)
     combined_df['tags'] = combined_df['tags'].fillna("")
 
     # 圖片 URL 容錯處理：確保每個產品都有圖片
