@@ -72,7 +72,7 @@ def load_data(keywords=["葉黃素", "益生菌", "魚油"]):
                 else: df['source'] = 'Other'
             
             # 推斷類別
-            if 'd2c_daiken' in filename.lower():
+            if 'd2c_daiken' in filename.lower() or 'd2c_dietician' in filename.lower():
                 df['category'] = df['title'].apply(get_category_from_title)
             else:
                 for cat in keywords:
