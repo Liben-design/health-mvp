@@ -17,6 +17,23 @@ st.markdown("""
         height: auto;
         border-radius: 4px;
     }
+
+    /* 強制圖片容器保持比例，防止塌陷 */
+    [data-testid="stImage"] {
+        min-height: 200px; /* 給予最小高度 */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #f8f9fa; /* 載入前的底色 */
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    [data-testid="stImage"] img {
+        object-fit: contain !important; /* 確保圖片不變形地填充 */
+        width: 100% !important;
+        height: auto !important;
+        max-height: 250px;
+    }
 </style>
 """, unsafe_allow_html=True)
 
