@@ -84,6 +84,7 @@ def load_data(keywords=["葉黃素", "益生菌", "魚油"]):
             # 推斷來源
             if 'source' not in df.columns:
                 if 'daiken' in filename.lower(): df['source'] = '大研生醫官網'
+                elif 'dietician' in filename.lower(): df['source'] = '營養師輕食官網'
                 elif 'momo' in filename.lower(): df['source'] = 'Momo'
                 elif 'pchome' in filename.lower(): df['source'] = 'PChome'
                 else: df['source'] = 'Other'
@@ -125,6 +126,10 @@ def load_data(keywords=["葉黃素", "益生菌", "魚油"]):
     else:
         combined_df['brand'] = combined_df['brand'].fillna("未標示").astype(str)
     combined_df['tags'] = combined_df['tags'].fillna("")
+    
+    if 'product_highlights' not in combined_df.columns:
+        combined_df['product_highlights'] = ""
+    combined_df['product_highlights'] = combined_df['product_highlights'].fillna("")
 
     # 圖片 URL 容錯處理：確保每個產品都有圖片，並修復 D2C 格式問題
     placeholder_img = "https://via.placeholder.com/300x200/f8f9fa/6c757d?text=VitaGuide"
@@ -137,6 +142,10 @@ def load_data(keywords=["葉黃素", "益生菌", "魚油"]):
         # 補全協議 (針對 //imgc.daikenshop.com)
         if s_url.startswith("//"):
             s_url = "https:" + s_url
+            
+        # 修正重複的 URL (針對營養師輕食爬蟲可能產生的錯誤)
+        if "https://www.dietician.com.tw/https" in s_url:
+            s_url = s_url.replace("https://www.dietician.com.tw/", "")
             
         # 簡單驗證
         if not s_url.startswith("http"):
@@ -279,5 +288,10 @@ else:
                 tags = row['tags'].split(" ") if row['tags'] else []
                 if tags:
                     st.markdown(" ".join([f"`{t}`" for t in tags]))
+
+                # 顯示 AI 分析亮點
+                if row['product_highlights']:
+                    highlights = str(row['product_highlights']).split(";")
+                    st.caption(" • ".join(highlights[:3]))
 
                 st.markdown("---")
