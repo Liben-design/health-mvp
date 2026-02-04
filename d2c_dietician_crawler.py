@@ -61,39 +61,55 @@ async def extract_highlights_with_llm(html_content):
     }}
     """
 
-    try:
-        # 檢查 API Key
-        if "GOOGLE_API_KEY" not in os.environ:
-            print("⚠️ 未設定 GOOGLE_API_KEY，跳過 AI 分析")
-            return {"product_name": "Unknown", "product_highlights": ""}
-
-        # 設定 Gemini (使用 gemini-2.0-flash 模型，速度快且支援 JSON mode)
-        genai.configure(api_key=os.environ["GOOGLE_API_KEY"])
-        # 修正：使用 'gemini-2.0-flash'
-        model = genai.GenerativeModel('gemini-2.0-flash', generation_config={"response_mime_type": "application/json", "temperature": 0.2})
-        
-        # 呼叫 API
-        full_prompt = f"You are a helpful assistant that extracts structured product data from HTML text.\n\n{prompt}"
-        response = await model.generate_content_async(full_prompt)
-
-        # 監控 Token 使用量
-        if response.usage_metadata:
-            print(f"   📊 Token 使用量: 輸入 {response.usage_metadata.prompt_token_count} + 輸出 {response.usage_metadata.candidates_token_count} = 總計 {response.usage_metadata.total_token_count}")
-        
-        result = json.loads(response.text)
-        return result
-    except Exception as e:
-        print(f"LLM 分析失敗: {e}")
-        # 若發生 404 錯誤，嘗試列出可用模型以供除錯
-        if "404" in str(e):
-            print("ℹ️ 提示：您的 API Key 可能無法存取目前的模型名稱。可用模型列表如下：")
-            try:
-                for m in genai.list_models():
-                    if 'generateContent' in m.supported_generation_methods:
-                        print(f"   - {m.name}")
-            except: pass
-        # 回傳預設空值以免程式崩潰
+    # 檢查 API Key
+    if "GOOGLE_API_KEY" not in os.environ:
+        print("⚠️ 未設定 GOOGLE_API_KEY，跳過 AI 分析")
         return {"product_name": "Unknown", "product_highlights": ""}
+
+    # 設定 Gemini (使用 gemini-2.0-flash 模型，速度快且支援 JSON mode)
+    genai.configure(api_key=os.environ["GOOGLE_API_KEY"])
+    model = genai.GenerativeModel('gemini-2.0-flash', generation_config={"response_mime_type": "application/json", "temperature": 0.2})
+    
+    full_prompt = f"You are a helpful assistant that extracts structured product data from HTML text.\n\n{prompt}"
+
+    # 重試機制：處理 429 Resource Exhausted
+    max_retries = 3
+    for attempt in range(max_retries + 1):
+        try:
+            # 呼叫 API
+            response = await model.generate_content_async(full_prompt)
+
+            # 監控 Token 使用量
+            if response.usage_metadata:
+                print(f"   📊 Token 使用量: 輸入 {response.usage_metadata.prompt_token_count} + 輸出 {response.usage_metadata.candidates_token_count} = 總計 {response.usage_metadata.total_token_count}")
+            
+            result = json.loads(response.text)
+            return result
+
+        except Exception as e:
+            error_msg = str(e)
+            if "429" in error_msg or "Resource exhausted" in error_msg:
+                if attempt < max_retries:
+                    wait_time = 15 * (attempt + 1) + random.uniform(1, 5) # 15s, 30s, 45s...
+                    print(f"⚠️ API 配額耗盡 (429)，等待 {wait_time:.1f} 秒後重試 (第 {attempt+1}/{max_retries} 次)...")
+                    await asyncio.sleep(wait_time)
+                    continue
+                else:
+                    print(f"❌ API 重試次數已達上限，放棄此筆資料分析。")
+            else:
+                print(f"LLM 分析失敗: {e}")
+                # 若發生 404 錯誤，嘗試列出可用模型以供除錯
+                if "404" in error_msg:
+                    print("ℹ️ 提示：您的 API Key 可能無法存取目前的模型名稱。可用模型列表如下：")
+                    try:
+                        for m in genai.list_models():
+                            if 'generateContent' in m.supported_generation_methods:
+                                print(f"   - {m.name}")
+                    except: pass
+                break # 其他錯誤不重試
+
+    # 回傳預設空值以免程式崩潰
+    return {"product_name": "Unknown", "product_highlights": ""}
 
 async def random_sleep(min_sec=3, max_sec=7):
     """異步等待一個隨機的秒數，模擬真人停頓。"""
