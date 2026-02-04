@@ -1,0 +1,9 @@
+# 安全性：忽略環境變數檔
+.env
+
+# Python 快取與編譯檔
+__pycache__/
+*.pyc
+
+# 系統檔案 (Mac)
+.DS_Store

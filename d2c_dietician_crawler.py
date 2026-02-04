@@ -9,12 +9,24 @@ from urllib.parse import urljoin
 from playwright.async_api import async_playwright
 from playwright_stealth import stealth_async
 import google.generativeai as genai
+from dotenv import load_dotenv
 
-# 注意：請確保環境變數 GOOGLE_API_KEY 已設定，或在此處直接填入您的 Key
-# 如果您已在終端機設定 export GOOGLE_API_KEY="..."，這行會自動讀取
-# 如果沒有，請將下方的 "AIzaSy..." 替換為您真實的 API Key
+# 載入 .env 檔案中的環境變數 (安全做法)
+# 使用絕對路徑確保能找到 .env，無論從哪裡執行程式
+script_dir = os.path.dirname(os.path.abspath(__file__))
+env_path = os.path.join(script_dir, '.env')
+
+# --- 除錯區塊 (請觀察執行後的輸出) ---
+print(f"🔍 Debug: 程式所在目錄: {script_dir}")
+print(f"🔍 Debug: 預期 .env 路徑: {env_path}")
+print(f"🔍 Debug: 檔案是否存在: {os.path.exists(env_path)}")
+# ----------------------------------
+
+load_dotenv(env_path, override=True)
+
+# 檢查 API Key 是否存在
 if "GOOGLE_API_KEY" not in os.environ:
-    os.environ["GOOGLE_API_KEY"] = "AIzaSy..."  # <--- 請在此貼上您的真實 API Key
+    print("⚠️ 警告：未偵測到 GOOGLE_API_KEY。請在專案根目錄建立 .env 檔案並設定 GOOGLE_API_KEY=...，否則 AI 分析功能將失效。")
 
 async def extract_highlights_with_llm(html_content):
     """
@@ -55,9 +67,10 @@ async def extract_highlights_with_llm(html_content):
             print("⚠️ 未設定 GOOGLE_API_KEY，跳過 AI 分析")
             return {"product_name": "Unknown", "product_highlights": ""}
 
-        # 設定 Gemini (使用 gemini-1.5-flash 模型，速度快且支援 JSON mode)
+        # 設定 Gemini (使用 gemini-2.0-flash 模型，速度快且支援 JSON mode)
         genai.configure(api_key=os.environ["GOOGLE_API_KEY"])
-        model = genai.GenerativeModel('gemini-1.5-flash', generation_config={"response_mime_type": "application/json", "temperature": 0.2})
+        # 修正：使用 'gemini-2.0-flash'
+        model = genai.GenerativeModel('gemini-2.0-flash', generation_config={"response_mime_type": "application/json", "temperature": 0.2})
         
         # 呼叫 API
         full_prompt = f"You are a helpful assistant that extracts structured product data from HTML text.\n\n{prompt}"
@@ -71,6 +84,14 @@ async def extract_highlights_with_llm(html_content):
         return result
     except Exception as e:
         print(f"LLM 分析失敗: {e}")
+        # 若發生 404 錯誤，嘗試列出可用模型以供除錯
+        if "404" in str(e):
+            print("ℹ️ 提示：您的 API Key 可能無法存取目前的模型名稱。可用模型列表如下：")
+            try:
+                for m in genai.list_models():
+                    if 'generateContent' in m.supported_generation_methods:
+                        print(f"   - {m.name}")
+            except: pass
         # 回傳預設空值以免程式崩潰
         return {"product_name": "Unknown", "product_highlights": ""}
 
