@@ -33,15 +33,21 @@ BRAND_WHITELIST = [
 def extract_brand(title):
     if not isinstance(title, str): return "未標示"
 
-    # 優先匹配品牌白名單（大小寫不敏感）
+    # 優先匹配 【XXX】 或 [XXX] 格式（標題開頭）
+    match = re.search(r"^[【\[](.+?)[】\]]", title)
+    if match:
+        return match.group(1).strip()
+
+    # 次優先匹配品牌白名單（大小寫不敏感）
     for brand in BRAND_WHITELIST:
         if brand.lower() in title.lower():
             return brand
 
-    # 嘗試抓取 【】 或 [] 裡面的品牌
+    # 嘗試抓取中間位置的 【】 或 [] 裡面的品牌
     match = re.search(r"[【\[](.+?)[】\]]", title)
     if match:
         return match.group(1).strip()
+    
     # 如果找不到，且標題夠長，暫時用前四個字當品牌
     return title[:4] if len(title) > 4 else "未標示"
 
@@ -72,6 +78,111 @@ def calculate_unit_price(title, price):
         unit_price = 0
 
     return total_count, unit_price
+
+def extract_highlights(title):
+    """
+    從標題中使用 Regex 提取產品亮點。
+    返回以分號 `;` 分隔的字串。
+    
+    規則庫：
+    - 規格類: rTG, EE, 游離型, 酯化型
+    - 專利類: FloraGLO, MenaQ7, BCM-95, Lutemax
+    - 認證類: IFOS, SGS, SNQ, 國家認證
+    - 飲食類: 全素, 素食, 無糖
+    """
+    if not isinstance(title, str):
+        return ""
+    
+    highlights = []
+    
+    # 規格類
+    if re.search(r"rTG|三酸甘油酯", title, re.IGNORECASE):
+        highlights.append("rTG高濃度")
+    if re.search(r"EE|乙酯", title, re.IGNORECASE):
+        highlights.append("EE乙酯型")
+    if re.search(r"游離型|Free form", title, re.IGNORECASE):
+        highlights.append("游離型")
+    elif re.search(r"酯化型|Ester", title, re.IGNORECASE):
+        highlights.append("酯化型")
+    
+    # 專利類
+    if re.search(r"FloraGLO|Kemin", title, re.IGNORECASE):
+        highlights.append("FloraGLO專利")
+    if re.search(r"Lutemax", title, re.IGNORECASE):
+        highlights.append("Lutemax")
+    if re.search(r"MenaQ7", title, re.IGNORECASE):
+        highlights.append("MenaQ7")
+    if re.search(r"BCM-95", title, re.IGNORECASE):
+        highlights.append("BCM-95薑黃素")
+    
+    # 營養素/成分類
+    if re.search(r"蝦紅素|藻紅素", title, re.IGNORECASE):
+        highlights.append("蝦紅素")
+    if re.search(r"花青素|山桑子|黑醋栗|智利酒果|越橘", title, re.IGNORECASE):
+        highlights.append("花青素")
+    if re.search(r"玻尿酸", title, re.IGNORECASE):
+        highlights.append("玻尿酸")
+    if re.search(r"DHA|EPA|Omega", title, re.IGNORECASE):
+        highlights.append("Omega-3")
+    if re.search(r"類黃酮|OPC", title, re.IGNORECASE):
+        highlights.append("類黃酮")
+    
+    # 比例類
+    if re.search(r"10[:：]2|10比2", title):
+        highlights.append("10:2黃金比例")
+    
+    # 認證類
+    if re.search(r"IFOS", title, re.IGNORECASE):
+        highlights.append("IFOS認證")
+    if re.search(r"SGS", title, re.IGNORECASE):
+        highlights.append("SGS檢驗")
+    if re.search(r"SNQ", title, re.IGNORECASE):
+        highlights.append("SNQ認證")
+    if re.search(r"國家認證|檢驗通過", title, re.IGNORECASE):
+        highlights.append("檢驗認證")
+    
+    # 飲食類
+    if re.search(r"全素|純素|100\s*%\s*素", title):
+        highlights.append("全素")
+    elif re.search(r"素食|蛋奶素", title):
+        highlights.append("素食")
+    
+    if re.search(r"無糖|無添加糖", title):
+        highlights.append("無糖")
+    
+    if re.search(r"無麩質|Gluten-free", title, re.IGNORECASE):
+        highlights.append("無麩質")
+    
+    # 去重並以分號分隔返回
+    highlights = list(dict.fromkeys(highlights))  # 保留順序同時去重
+    return ";".join(highlights) if highlights else ""
+
+def clean_image_url(url):
+    """
+    清洗圖片網址，確保格式正確：
+    1. 補全協議：//domain.com -> https://domain.com
+    2. 修復雙協議：https://domain/https://... -> https://...
+    3. 確保都以 https: 開頭
+    """
+    if not isinstance(url, str) or not url:
+        return ""
+    
+    # 修復雙協議問題（如：https://domain/https://...）
+    if "https://https://" in url or "http://https://" in url or "http://http://" in url:
+        # 提取第二個協議開始的部分
+        match = re.search(r'(https?://)', url)
+        if match:
+            url = url[match.start():]
+    
+    # 補全協議
+    if url.startswith('//'):
+        url = 'https:' + url
+    elif not url.startswith('http'):
+        # 如果沒有協議，直接補 https://
+        if not url.startswith('https://') and not url.startswith('http://'):
+            url = 'https://' + url
+    
+    return url
 
 def extract_tags(text):
     tags = []
@@ -168,7 +279,8 @@ def scrape_pchome(keyword):
                     else:
                         image_url = "https://dummyimage.com/200x200/cccccc/ffffff.png&text=No+Image"
 
-                    if not pid: continue
+                    # 清洗圖片網址
+                    image_url = clean_image_url(image_url)
 
                     total_count, unit_price = calculate_unit_price(name, int(price))
 
@@ -179,9 +291,7 @@ def scrape_pchome(keyword):
                         "price": int(price),
                         "url": f"https://24h.pchome.com.tw/prod/{pid}",
                         "image_url": image_url,
-                        "tags": extract_tags(name),
-                        "sales_volume": 0,  # PChome 不提供銷量數據，預設為 0
-                        "raw_data": name,
+                        "product_highlights": extract_highlights(name),
                         "total_count": total_count,
                         "unit_price": unit_price
                     })
@@ -292,11 +402,11 @@ def scrape_momo(keyword, limit=100):
                                 if not image_url and "dummy" not in src and "data:image" not in src:
                                     image_url = src
 
-                        # 標準化圖片網址：補上 "https:"
-                        if image_url and image_url.startswith('//'):
-                            image_url = 'https:' + image_url
+                        if not image_url: 
+                            image_url = "https://dummyimage.com/200x200/cccccc/ffffff.png&text=MOMO+No+Img"
                         
-                        if not image_url: image_url = "https://dummyimage.com/200x200/cccccc/ffffff.png&text=MOMO+No+Img"
+                        # 清洗圖片網址
+                        image_url = clean_image_url(image_url)
 
                         # 抓取銷量 - 如果抓不到預設為 0
                         sales_volume = 0
@@ -308,9 +418,9 @@ def scrape_momo(keyword, limit=100):
                         except:
                             pass
 
-                        # 合併 title 和內頁文字用於 extract_tags
+                        # 合併 title 和內頁文字用於 extract_highlights
                         combined_text = title + " " + inner_text
-                        tags = extract_tags(combined_text)
+                        product_highlights = extract_highlights(combined_text)
 
                         total_count, unit_price = calculate_unit_price(title, price)
 
@@ -321,9 +431,7 @@ def scrape_momo(keyword, limit=100):
                             "price": price,
                             "url": link,
                             "image_url": image_url,
-                            "tags": tags,
-                            "sales_volume": sales_volume,
-                            "raw_data": title,
+                            "product_highlights": product_highlights,
                             "total_count": total_count,
                             "unit_price": unit_price
                         })
@@ -347,9 +455,7 @@ def scrape_momo(keyword, limit=100):
                                 "price": basic_price,
                                 "url": basic_link,
                                 "image_url": "https://dummyimage.com/200x200/cccccc/ffffff.png&text=MOMO+Basic",
-                                "tags": "",
-                                "sales_volume": 0,
-                                "raw_data": basic_title,
+                                "product_highlights": extract_highlights(basic_title),
                                 "total_count": total_count,
                                 "unit_price": unit_price
                             })
