@@ -2,6 +2,7 @@ import asyncio
 import os
 import json
 import random
+import re
 from bs4 import BeautifulSoup
 from playwright.async_api import async_playwright
 from playwright_stealth import stealth_async
@@ -119,6 +120,34 @@ class AgentD2CScanner:
                     print(f"⏩ [Agent] 跳過非產品頁面 (無 Product 標記): {url}")
                     return None
 
+                # [New] 嘗試直接從 DOM 提取價格 (彌補 LLM 對動態渲染內容的解析不足)
+                # 針對 Vitabox (Shopline) 結構: <div class="price-regular"><span class="price">NT$1,780</span></div>
+                dom_price = 0
+                try:
+                    price_selectors = [
+                        ".price-regular .price", # Vitabox / Shopline 標準
+                        ".price-sale .price",    # Shopline 特價
+                        ".product-price",        # 通用
+                        ".special-price",        # 通用
+                        "span.price"             # 寬鬆匹配
+                    ]
+                    
+                    for selector in price_selectors:
+                        if await page.locator(selector).count() > 0:
+                            # 找第一個可見且包含數字的元素
+                            elements = await page.locator(selector).all()
+                            for el in elements:
+                                if await el.is_visible():
+                                    p_text = await el.text_content()
+                                    if any(c.isdigit() for c in p_text):
+                                        p_val = int(re.sub(r'[^\d]', '', p_text) or 0)
+                                        if p_val > 0:
+                                            dom_price = p_val
+                                            break
+                            if dom_price > 0: break
+                except Exception as e:
+                    print(f"⚠️ DOM 價格提取失敗: {e}")
+
                 # 滾動頁面觸發 Lazy Load
                 await page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
                 await asyncio.sleep(2)
@@ -142,11 +171,16 @@ class AgentD2CScanner:
                 
                 if ai_data:
                     # 整合資料
+                    final_price = ai_data.get("price", 0)
+                    # 若 AI 沒抓到價格 (0)，但 DOM 有抓到，則使用 DOM 價格
+                    if final_price == 0 and dom_price > 0:
+                        final_price = dom_price
+
                     data = {
                         "source": "D2C_Hunter", # 標記來源
                         "brand": ai_data.get("brand", "Unknown"),
                         "title": ai_data.get("title", "Unknown"),
-                        "price": ai_data.get("price", 0),
+                        "price": final_price,
                         "unit_price": ai_data.get("unit_price", 0),
                         "total_count": ai_data.get("total_count", 0),
                         "url": url,
