@@ -249,14 +249,15 @@ async def scrape_daiken_all_products():
                     print(f"成功抓取: {name} | 特價: {special_price_val} | 標籤: '{tags}'")
 
                     all_data.append({
-                        "product_name": name,
-                        "original_price": original_price_val,
-                        "special_price": special_price_val,
-                        "total_count": total_count,
+                        "source": "Daiken",
+                        "brand": "大研生醫",
+                        "title": name,
+                        "price": special_price_val,
                         "unit_price": unit_price,
-                        "tags": tags,
+                        "total_count": total_count,
+                        "url": link,
                         "image_url": image_url,
-                        "product_url": link
+                        "product_highlights": tags
                     })
                     
                     success = True # 標記成功，跳出 while 迴圈

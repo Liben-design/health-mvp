@@ -15,7 +15,7 @@ except ImportError:
 # ==========================================
 # 設定與常數
 # ==========================================
-TARGET_URL = "https://shop.vitabox.com.tw/collections/all"  # Vitabox 全系列產品頁面
+TARGET_URL = "https://shop.vitabox.com.tw/categories/featured-products"  # Vitabox 產品列表頁
 OUTPUT_FILE = "data/d2c_vitabox.csv"
 USER_AGENTS = [
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
@@ -52,6 +52,7 @@ class VitaboxStealthCrawler:
         """
         漸進式滾動 (Progressive Scrolling)
         確保 Lazy Load 圖片被觸發，並模擬人類閱讀行為
+        (僅負責滾動當前頁面，分頁邏輯移至 run 方法處理)
         """
         print("🖱️ 開始漸進式滾動載入頁面...")
         
@@ -75,8 +76,8 @@ class VitaboxStealthCrawler:
             current_scroll = await page.evaluate("window.scrollY + window.innerHeight")
             
             # 如果目前的視窗底部已經接近頁面總高度，則停止
-            if current_scroll >= new_height - 100:
-                print("✅ 已滾動至頁面底部")
+            if current_scroll >= new_height - 200:
+                print("✅ 已滾動至頁面底部 (或已無更多頁面)")
                 break
                 
             # 如果高度沒有變化持續太久(可選邏輯)，這裡簡化為依賴 current_scroll
@@ -92,12 +93,16 @@ class VitaboxStealthCrawler:
         # 定位產品卡片：通常在 Collection 頁面會有特定的 Grid Item Class
         # 這裡嘗試抓取常見的 Shopify/Cyberbiz 結構
         # 策略：尋找包含 'product' 且有 'item' 或 'card' 的容器，或是直接找連結
-        product_cards = await page.locator(".product-item, .product-card, .grid__item").all()
+        # product_cards = await page.locator(".product-item, .product-card, .grid__item").all()
+        
+        # Shopline 策略：直接抓取所有指向 /products/ 的 <a> 標籤
+        # Shopline 的產品連結通常是 /products/product-slug
+        product_cards = await page.locator("a[href*='/products/'], a[href*='/product/']").all()
         
         if not product_cards:
-            print("⚠️ 未偵測到標準產品卡片，嘗試使用通用連結分析...")
+            print("⚠️ 未偵測到任何產品連結，嘗試等待更久...")
             # Fallback: 抓取所有包含價格的連結區塊
-            product_cards = await page.locator("a[href*='/products/']").all()
+            product_cards = await page.locator("a[href*='/products/'], a[href*='/product/']").all()
 
         print(f"📊 偵測到 {len(product_cards)} 個潛在產品項目")
 
@@ -105,25 +110,36 @@ class VitaboxStealthCrawler:
             try:
                 # 1. Title
                 title_el = card.locator("h3, h4, .title, .product-title").first
-                if await title_el.count() == 0: continue # 若無標題則跳過
-                title = await title_el.text_content()
+                # 如果找不到標題元素，嘗試直接讀取連結內的文字
+                if await title_el.count() > 0:
+                    title = await title_el.text_content()
+                else:
+                    title = await card.text_content()
+                
                 title = title.strip()
+                # 過濾掉太短的標題 (可能是 "查看更多" 之類的按鈕)
+                if len(title) < 2: continue
+                
+                # 過濾非保健食品 (盤子、提袋等)
+                if any(keyword in title for keyword in ["瓷盤", "禮袋", "提袋", "購物袋"]):
+                    continue
 
                 # 2. Price
                 # 優先找特價，若無則找原價
                 price_el = card.locator(".price, .money, span:has-text('NT$')").first
-                price_text = await price_el.text_content() if await price_el.count() > 0 else "0"
+                # 如果卡片內找不到價格，嘗試往上層找 (有時 a 標籤只是圖片，價格在兄弟元素)
+                if await price_el.count() == 0:
+                    # 嘗試找父層容器
+                    parent = card.locator("..")
+                    price_el = parent.locator(".price, .money, span:has-text('NT$')").first
+
+                price_text = await price_el.text_content() if await price_el.count() > 0 else ""
                 # 清洗價格: 去除 NT$, 逗號, 空白
                 price = int(''.join(filter(str.isdigit, price_text)) or 0)
 
                 # 3. URL
                 # 如果 card 本身是 <a> 標籤
-                tag_name = await card.evaluate("el => el.tagName.toLowerCase()")
-                if tag_name == 'a':
-                    raw_url = await card.get_attribute("href")
-                else:
-                    link_el = card.locator("a").first
-                    raw_url = await link_el.get_attribute("href")
+                raw_url = await card.get_attribute("href")
                 
                 full_url = f"https://shop.vitabox.com.tw{raw_url}" if raw_url.startswith("/") else raw_url
 
@@ -132,8 +148,14 @@ class VitaboxStealthCrawler:
                 raw_img_url = await img_el.get_attribute("src") or await img_el.get_attribute("data-src") or ""
                 if raw_img_url.startswith("//"):
                     image_url = f"https:{raw_img_url}"
-                else:
+                elif raw_img_url.startswith("http"):
                     image_url = raw_img_url
+                else:
+                    image_url = ""
+
+                # 去重檢查：避免同一個產品抓到兩次 (圖片連結和文字連結)
+                if any(d['url'] == full_url for d in self.data):
+                    continue
 
                 # 5. Highlights (嘗試從卡片文字中提取非標題/價格的描述)
                 text_content = await card.text_content()
@@ -178,18 +200,56 @@ class VitaboxStealthCrawler:
             await stealth_async(page)
 
             print(f"🚀 啟動隱身爬蟲，目標: {TARGET_URL}")
-            await page.goto(TARGET_URL, wait_until="domcontentloaded")
+            try:
+                # 改用 networkidle 確保動態內容載入完成
+                await page.goto(TARGET_URL, wait_until="networkidle", timeout=60000)
+            except Exception:
+                print("⚠️ NetworkIdle 超時，嘗試繼續執行...")
             
+            print(f"📄 當前頁面標題: {await page.title()}")
+
             # 執行擬人行為
             await self.random_mouse_move(page)
-            await self.human_like_delay(2, 4)
-            await self.progressive_scroll(page)
             
-            # 再次隨機移動滑鼠確保元素穩定
-            await self.random_mouse_move(page)
-            
-            # 提取資料
-            await self.extract_product_data(page)
+            while True:
+                await self.human_like_delay(2, 4)
+                await self.progressive_scroll(page)
+                
+                # 再次隨機移動滑鼠確保元素穩定
+                await self.random_mouse_move(page)
+                
+                # 提取當前頁面資料
+                await self.extract_product_data(page)
+
+                # 檢查並處理下一頁 (Shopline 分頁結構)
+                # 嘗試多種選擇器以確保能抓到按鈕
+                next_selectors = [
+                    "a[rel='next']",                      # 標準語義
+                    "li.next a",                          # 常見 Bootstrap 結構
+                    ".pagination .next a",                # 另一種結構
+                    ".pagination-next a",                 # Shopline 變體
+                    "a:has-text('下一頁')",               # 中文文字
+                    "a:has-text('Next')",                 # 英文文字
+                    "a:has(i.fa-angle-right)",            # FontAwesome 圖示
+                    "a:has(i.fa-chevron-right)"           # 另一種圖示
+                ]
+                
+                next_btn = None
+                for selector in next_selectors:
+                    btn = page.locator(selector).first
+                    if await btn.count() > 0 and await btn.is_visible():
+                        next_btn = btn
+                        print(f"🔎 發現下一頁按鈕 (Selector: {selector})")
+                        break
+                
+                if next_btn:
+                    print("👉 點擊下一頁...")
+                    # 點擊並等待頁面導航完成
+                    await next_btn.click()
+                    await page.wait_for_load_state("networkidle", timeout=60000)
+                else:
+                    print("✅ 已無下一頁，停止爬取")
+                    break
             
             await browser.close()
 

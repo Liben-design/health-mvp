@@ -345,7 +345,10 @@ async def scrape_dietician_all_products():
                         matches = re.findall(r'(?:NT\$?|\$)\s*(\d{1,3}(?:,\d{3})*|\d+)', price_text_all, re.IGNORECASE)
                         for m in matches:
                             try:
-                                prices.append(int(m.replace(',', '')))
+                                val = int(m.replace(',', ''))
+                                # 過濾掉過低的價格 (例如 100 元通常是加購價或運費)
+                                if val > 200: 
+                                    prices.append(val)
                             except:
                                 pass
                         if prices:
@@ -356,6 +359,11 @@ async def scrape_dietician_all_products():
                             else:
                                 original_price_val = prices[0]
                                 special_price_val = prices[0]
+                    
+                    # 二次檢查：如果抓到的價格 <= 200，強制歸零或設為 Unknown，避免誤導
+                    if special_price_val <= 200:
+                        special_price_val = 0
+                        original_price_val = 0
                     
                     if not name: name = "Unknown"
 
@@ -386,15 +394,15 @@ async def scrape_dietician_all_products():
                     print(f"成功抓取: {name} | 特價: {special_price_val} | 規格: {total_count} | 標籤: '{tags}' | 亮點: {highlights[:20]}...")
 
                     all_data.append({
-                        "product_name": name,
-                        "original_price": original_price_val,
-                        "special_price": special_price_val,
-                        "total_count": total_count,
+                        "source": "Dietician",
+                        "brand": "營養師輕食",
+                        "title": name,
+                        "price": special_price_val,
                         "unit_price": unit_price,
-                        "tags": tags,
-                        "product_highlights": highlights,
+                        "total_count": total_count,
+                        "url": link,
                         "image_url": image_url,
-                        "product_url": link
+                        "product_highlights": highlights if highlights else tags
                     })
                     
                     success = True
