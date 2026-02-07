@@ -111,13 +111,25 @@ Context 共享：在提供解決方案前，請先讀取 @workspace 中的最新
   - ✅ **全開模式**：恢復 Daiken, Vitabox, Dietician 三大爬蟲平行執行設定。
   - ✅ **整合驗證**：確認所有 D2C 爬蟲皆能產出符合 Unified Schema 的 CSV，且價格與亮點欄位正常。
 
+### ✅ 今日完成 (2026/02/06 Phase 2) - D2C 獵人自動化系統 (D2C Hunter)
+- **架構實作**：
+  - 建立 `d2c_pipeline_manager.py` (總指揮) 與 `data/batch_scanner.py` (批次採集)。
+  - 實作 `data/sitemap_parser.py`：支援遞迴解析、Shopify/WordPress 結構偵測、靜態網址過濾。
+  - 實作 `data/agent_d2c_scanner.py`：整合 Gemini AI 語義分析 + Playwright DOM 價格提取 (解決 Vitabox 動態價格問題)。
+- **關鍵突破**：
+  - **Sitemap 解析**：成功突破配方時代 (Health Formula) 自定義網址結構，並過濾悠活原力 (YohoPower) 亂碼連結。
+  - **智能過濾 (Smart Filter)**：實作靜態 (URL Pattern) 與動態 (Meta Tag/Content) 雙重過濾，大幅降低非產品頁面的 Token 消耗。
+- **執行成果**：
+  - 針對前 5 大品牌 (大研、營養師輕食、Vitabox、配方時代、悠活原力) 進行測試。
+  - 成功採集 **169 筆** 有效資料至 `data/d2c_full_database.csv`。
+
 ### 🚧 進行中 / 優化中 (In Progress)
-- **全品牌 D2C 爬蟲任務執行 (Scheduled for Tomorrow - 2026/02/06)**：
-  - 執行 `d2c_main.py` (大研、Vitabox) 與 `d2c_dietician_crawler.py`。
-  - 驗證所有 CSV 資料的合併與前台顯示效果。
-  - 驗證 `general_scraper.py` 產出的 CSV 能被 `2_lutein_app.py` 正確讀取。
-- **Dietician Scraper 重構**：
-  - 將 `d2c_dietician_crawler.py` 遷移至 `scrapers/dietician_scraper.py` 以符合新架構。
+- **全品牌擴展 (Scheduled for Tomorrow)**：
+  - 將 `data/d2c_domains_list.csv` 擴充至 50+ 品牌。
+  - 執行 `sitemap_parser.py` 進行全量連結發現。
+  - 執行 `batch_scanner.py` 進行全量 AI 採集。
+- **前台整合**：
+  - 將 `d2c_full_database.csv` 整合進 `2_lutein_app.py`，實現全網比價。
 
 ---
 
@@ -159,26 +171,20 @@ Context 共享：在提供解決方案前，請先讀取 @workspace 中的最新
 
 ### ✅ 執行清單
 
-**Phase 1: 電商爬蟲** (~10 分鐘)
-1. 執行 `general_scraper.py` 爬取 Momo 與 PChome 葉黃素產品
-   - 輸出：`data/general_momo_lutein.csv` 與 `data/general_pchome_lutein.csv`
-   - 驗證：檢查所有欄位（brand, title, product_highlights, image_url）完整度
+**Phase 1: D2C 獵人全量掃描** (~30 分鐘)
+1. 確認 `data/d2c_domains_list.csv` 包含所有目標品牌。
+2. 執行 `python data/sitemap_parser.py`：
+   - 預期產出：`data/target_product_urls.json` (目標 > 1000 筆連結)。
+3. 執行 `python data/batch_scanner.py`：
+   - 預期產出：`data/d2c_full_database.csv`。
 
-**Phase 2: D2C 爬蟲** (~20 分鐘)
-2. 執行 `d2c_main.py` 爬取大研與 Vitabox
-   - 輸出：`data/d2c_daiken_all_products.csv` 與 `data/d2c_vitabox.csv`
-3. 執行 `d2c_dietician_crawler.py` 爬取營養師輕食
-   - 輸出：`data/d2c_dietician_products.csv`
-   - 注意：需配置 `GOOGLE_API_KEY` 以使用 Gemini API
-
-**Phase 3: 資料驗證** (~5 分鐘)
-4. 檢查所有 CSV 是否都包含統一欄位：`source, brand, title, price, unit_price, total_count, url, image_url, product_highlights`
-5. 執行 CSV 合併邏輯（參考 `2_lutein_app.py` 的資料載入部分）
-6. 啟動 Streamlit：`streamlit run 2_lutein_app.py`
+**Phase 2: 資料整合與驗證** (~10 分鐘)
+4. 檢查 `d2c_full_database.csv` 的價格與亮點欄位是否完整。
+5. 啟動 Streamlit：`streamlit run 2_lutein_app.py`。
    - 驗證：圖片、品牌、亮點、價格排序等是否正常顯示
 
-**Phase 4: 迭代修復** (as needed)
-7. 根據前台顯示結果調整爬蟲邏輯
+**Phase 3: 迭代修復** (as needed)
+6. 根據前台顯示結果調整爬蟲邏輯
    - 品牌提取不準確？→ 擴展 `BRAND_WHITELIST`
    - 亮點缺失？→ 擴展 `extract_highlights()` 規則庫
    - 圖片破圖？→ 檢查 `clean_image_url()` 邏輯
