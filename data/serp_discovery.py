@@ -3,7 +3,12 @@ import re
 import random
 from urllib.parse import urlparse
 from playwright.async_api import async_playwright
-from playwright_stealth import stealth_async
+try:
+    from playwright_stealth import stealth_async
+except Exception:
+    # Fallback when playwright_stealth is not available in the environment
+    async def stealth_async(page):
+        return None
 
 class SerpDiscovery:
     """
@@ -14,10 +19,12 @@ class SerpDiscovery:
         # 黑名單：排除電商平台、媒體、論壇、政府機構等非 D2C 網站
         self.blacklisted_domains = [
             "momo.com.tw", "pchome.com.tw", "shopee.tw", "yahoo.com", 
-            "books.com.tw", "rakuten.com.tw", "etmall.com.tw", "friDay.tw",
-            "ptt.cc", "dcard.tw", "mobile01.com", "facebook.com", "instagram.com",
-            "youtube.com", "wikipedia.org", "gov.tw", "edu.tw", "commonhealth.com.tw",
-            "heho.com.tw", "edh.tw", "health.udn.com", "top1health.com"
+            "yahoo.com.tw", "books.com.tw", "rakuten.com.tw", "etmall.com.tw", "friDay.tw",
+            "biggo.com.tw", "feebee.com.tw",
+            "ptt.cc", "dcard.tw", "mobile01.com", "pixnet.net", "canceraway.com",
+            "facebook.com", "instagram.com", "youtube.com", "wikipedia.org",
+            "gov.tw", "edu.tw", "commonhealth.com.tw", "heho.com.tw",
+            "edh.tw", "health.udn.com", "top1health.com"
         ]
         # 隨機 User-Agent 列表
         self.user_agents = [
@@ -42,7 +49,7 @@ class SerpDiscovery:
         except:
             return False
 
-    async def search_google(self, keyword, num_results=20):
+    async def search_google(self, keyword, pages=10, results_per_page=10):
         """
         使用 Playwright 模擬瀏覽器搜尋 Google，規避簡單的爬蟲檢測。
         """
@@ -61,39 +68,47 @@ class SerpDiscovery:
             await stealth_async(page)
 
             try:
-                # 前往 Google 搜尋
-                # 加入 hl=zh-TW 強制中文介面，避免結構差異
-                await page.goto(f"https://www.google.com/search?q={keyword}&num={num_results}&hl=zh-TW", wait_until="domcontentloaded")
-                
-                # 等待搜尋結果容器出現 (最多等 8 秒)
-                try:
-                    await page.wait_for_selector("#search", timeout=8000)
-                except:
-                    print(f"⚠️ [SERP] 等待搜尋結果超時，可能遇到 Captcha")
-                    print("⏳ 偵測到異常，暫停 20 秒供人工排除 (請在彈出的瀏覽器視窗中完成驗證)...")
-                    # 給予人工驗證時間
-                    await asyncio.sleep(20)
+                for page_index in range(pages):
+                    start = page_index * results_per_page
+                    # 前往 Google 搜尋
+                    # 加入 hl=zh-TW 強制中文介面，避免結構差異
+                    await page.goto(
+                        f"https://www.google.com/search?q={keyword}&num={results_per_page}&start={start}&hl=zh-TW",
+                        wait_until="domcontentloaded"
+                    )
                     
-                    # 重試等待
+                    # 等待搜尋結果容器出現 (最多等 8 秒)
                     try:
-                        await page.wait_for_selector("#search", timeout=5000)
+                        await page.wait_for_selector("#search", timeout=8000)
                     except:
-                        await page.screenshot(path=f"debug_serp_error_{keyword}.png")
+                        print(f"⚠️ [SERP] 等待搜尋結果超時，可能遇到 Captcha")
+                        print("⏳ 偵測到異常，暫停 20 秒供人工排除 (請在彈出的瀏覽器視窗中完成驗證)...")
+                        # 給予人工驗證時間
+                        await asyncio.sleep(20)
+                        
+                        # 重試等待
+                        try:
+                            await page.wait_for_selector("#search", timeout=5000)
+                        except:
+                            await page.screenshot(path=f"debug_serp_error_{keyword}.png")
 
-                await asyncio.sleep(3) # 額外等待 JS 渲染
+                    await asyncio.sleep(3) # 額外等待 JS 渲染
 
-                # 抓取搜尋結果連結 - 使用更寬鬆的選擇器
-                # 改為抓取 #search 區域內所有帶有 http 的連結，不再依賴 div.g
-                links = await page.locator("#search a[href^='http']").all()
-                
-                for link in links:
-                    href = await link.get_attribute("href")
-                    if href and href.startswith("http") and "google.com" not in href:
-                        if self.is_valid_d2c_domain(href):
-                            # 只保留首頁或根網域，方便後續 Sitemap 解析
-                            parsed = urlparse(href)
-                            root_url = f"{parsed.scheme}://{parsed.netloc}"
-                            results.add(root_url)
+                    # 抓取搜尋結果連結 - 使用更寬鬆的選擇器
+                    # 改為抓取 #search 區域內所有帶有 http 的連結，不再依賴 div.g
+                    links = await page.locator("#search a[href^='http']").all()
+                    
+                    for link in links:
+                        href = await link.get_attribute("href")
+                        if href and href.startswith("http") and "google.com" not in href:
+                            if self.is_valid_d2c_domain(href):
+                                # 只保留首頁或根網域，方便後續 Sitemap 解析
+                                parsed = urlparse(href)
+                                root_url = f"{parsed.scheme}://{parsed.netloc}"
+                                results.add(root_url)
+
+                    # 模擬真人翻頁停留，避免觸發驗證
+                    await asyncio.sleep(random.uniform(5, 8))
             
             except Exception as e:
                 print(f"❌ [SERP] 搜尋失敗: {e}")
@@ -106,5 +121,5 @@ class SerpDiscovery:
 # 測試用
 if __name__ == "__main__":
     finder = SerpDiscovery()
-    domains = asyncio.run(finder.search_google("葉黃素 推薦", 10))
+    domains = asyncio.run(finder.search_google("葉黃素 推薦", pages=10, results_per_page=10))
     print(domains)
