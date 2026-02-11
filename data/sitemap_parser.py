@@ -27,14 +27,77 @@ class SitemapParser:
         
         # [New] 網域白名單規則：可覆蓋一般 include/exclude 邏輯
         # 配方時代 (formula-time) 產品 URL 結構可能不固定，且有時不含 /product/
+        # 允許短路徑 slug (e.g. /lutein-ex)，但仍排除常見內容頁
         self.domain_whitelist_rules = {
             "www.formula-time.com": {
-                "allow_patterns": ["/products/", "/product/", "lutein", "fish-oil", "probiotic"],
-                "deny_patterns": ["/blog", "/news", "/article", "/about", "/contact", "/faq", "/policy", "/member", "/cart"]
+                "allow_patterns": [
+                    "/products/",
+                    "/product/",
+                    "/shop/",
+                    "lutein",
+                    "fish-oil",
+                    "probiotic",
+                    "omega",
+                    "collagen",
+                    "calcium",
+                    "magnesium",
+                    "vitamin",
+                    "b-complex",
+                    "zinc",
+                    "iron"
+                ],
+                "deny_patterns": [
+                    "/blog",
+                    "/news",
+                    "/article",
+                    "/about",
+                    "/contact",
+                    "/faq",
+                    "/policy",
+                    "/member",
+                    "/cart",
+                    "/account",
+                    "/terms",
+                    "/privacy",
+                    "/page",
+                    "/pages"
+                ],
+                "allow_short_slug": True
             },
             "formula-time.com": {
-                "allow_patterns": ["/products/", "/product/", "lutein", "fish-oil", "probiotic"],
-                "deny_patterns": ["/blog", "/news", "/article", "/about", "/contact", "/faq", "/policy", "/member", "/cart"]
+                "allow_patterns": [
+                    "/products/",
+                    "/product/",
+                    "/shop/",
+                    "lutein",
+                    "fish-oil",
+                    "probiotic",
+                    "omega",
+                    "collagen",
+                    "calcium",
+                    "magnesium",
+                    "vitamin",
+                    "b-complex",
+                    "zinc",
+                    "iron"
+                ],
+                "deny_patterns": [
+                    "/blog",
+                    "/news",
+                    "/article",
+                    "/about",
+                    "/contact",
+                    "/faq",
+                    "/policy",
+                    "/member",
+                    "/cart",
+                    "/account",
+                    "/terms",
+                    "/privacy",
+                    "/page",
+                    "/pages"
+                ],
+                "allow_short_slug": True
             }
         }
 
@@ -90,6 +153,11 @@ class SitemapParser:
                 return False
             if any(allow in u for allow in rules["allow_patterns"]):
                 return True
+            if rules.get("allow_short_slug"):
+                path = parsed.path.strip("/")
+                # 允許單一 slug 且長度足夠（避免 /about 這類頁面）
+                if path and "/" not in path and len(path) >= 5:
+                    return True
             # 白名單網域但沒有明顯產品特徵時，保守不放行
             return False
 
@@ -174,7 +242,7 @@ class SitemapParser:
         return [{"brand": brand, "url": u} for u in found_urls]
 
 def main():
-    input_csv = "data/d2c_domains_list.csv"
+    input_csv = "data/test_domains.csv"
     output_json = "data/target_product_urls.json"
     
     # 檢查輸入檔

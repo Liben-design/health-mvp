@@ -1,871 +1,127 @@
 [
   {
-    "brand": "vitabox",
-    "url": "https://shop.vitabox.com.tw/products/lactobacillus"
-  },
-  {
-    "brand": "vitabox",
-    "url": "https://shop.vitabox.com.tw/products/b-complex-maca"
-  },
-  {
-    "brand": "vitabox",
-    "url": "https://shop.vitabox.com.tw/products/maca-damiana"
-  },
-  {
-    "brand": "vitabox",
+    "brand": "Vitabox",
     "url": "https://shop.vitabox.com.tw/products/vitaminc"
   },
   {
-    "brand": "vitabox",
-    "url": "https://shop.vitabox.com.tw/products/lp28-probiotics"
-  },
-  {
-    "brand": "vitabox",
-    "url": "https://shop.vitabox.com.tw/products/kid-lp28-probiotics"
-  },
-  {
-    "brand": "vitabox",
-    "url": "https://shop.vitabox.com.tw/products/luteinplus"
-  },
-  {
-    "brand": "vitabox",
-    "url": "https://shop.vitabox.com.tw/products/vitamin-d"
-  },
-  {
-    "brand": "vitabox",
-    "url": "https://shop.vitabox.com.tw/products/twk10-probiotic"
-  },
-  {
-    "brand": "vitabox",
-    "url": "https://shop.vitabox.com.tw/products/uc2"
-  },
-  {
-    "brand": "vitabox",
-    "url": "https://shop.vitabox.com.tw/products/simple-bag"
-  },
-  {
-    "brand": "vitabox",
-    "url": "https://shop.vitabox.com.tw/products/c3-curcumin"
-  },
-  {
-    "brand": "vitabox",
-    "url": "https://shop.vitabox.com.tw/products/nmn"
-  },
-  {
-    "brand": "vitabox",
-    "url": "https://shop.vitabox.com.tw/products/zinc"
-  },
-  {
-    "brand": "vitabox",
-    "url": "https://shop.vitabox.com.tw/products/multivitamin"
-  },
-  {
-    "brand": "vitabox",
-    "url": "https://shop.vitabox.com.tw/products/eco-bag"
-  },
-  {
-    "brand": "vitabox",
-    "url": "https://shop.vitabox.com.tw/products/algaeoil-omega-3"
-  },
-  {
-    "brand": "vitabox",
-    "url": "https://shop.vitabox.com.tw/products/fishoil-omega3"
-  },
-  {
-    "brand": "vitabox",
-    "url": "https://shop.vitabox.com.tw/products/female-bcomplex"
-  },
-  {
-    "brand": "vitabox",
-    "url": "https://shop.vitabox.com.tw/products/prenatal-calcium"
-  },
-  {
-    "brand": "vitabox",
-    "url": "https://shop.vitabox.com.tw/products/folicacid-iron-c"
-  },
-  {
-    "brand": "vitabox",
+    "brand": "Vitabox",
     "url": "https://shop.vitabox.com.tw/products/simple-plate"
   },
   {
-    "brand": "vitabox",
-    "url": "https://shop.vitabox.com.tw/products/enzyme"
+    "brand": "Vitabox",
+    "url": "https://shop.vitabox.com.tw/products/uc2"
   },
   {
-    "brand": "vitabox",
-    "url": "https://shop.vitabox.com.tw/products/white-kidney-bean-extract-african-mango-seed-sod-enzymes"
-  },
-  {
-    "brand": "vitabox",
-    "url": "https://shop.vitabox.com.tw/products/gaba"
-  },
-  {
-    "brand": "vitabox",
-    "url": "https://shop.vitabox.com.tw/products/calcium-algae"
-  },
-  {
-    "brand": "vitabox",
-    "url": "https://shop.vitabox.com.tw/products/lecithin"
-  },
-  {
-    "brand": "vitabox",
-    "url": "https://shop.vitabox.com.tw/products/cranberry"
-  },
-  {
-    "brand": "vitabox",
-    "url": "https://shop.vitabox.com.tw/products/lutein"
-  },
-  {
-    "brand": "vitabox",
+    "brand": "Vitabox",
     "url": "https://shop.vitabox.com.tw/products/collagen"
   },
   {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/natural-aquaminf-calciummg"
+    "brand": "Vitabox",
+    "url": "https://shop.vitabox.com.tw/products/lecithin"
   },
   {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/yohomask"
+    "brand": "Vitabox",
+    "url": "https://shop.vitabox.com.tw/products/folicacid-iron-c"
   },
   {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/pharmacy-aquaminf-calciummg"
+    "brand": "Vitabox",
+    "url": "https://shop.vitabox.com.tw/products/gaba"
   },
   {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/pure-ha-capsules"
+    "brand": "Vitabox",
+    "url": "https://shop.vitabox.com.tw/products/fishoil-omega3"
   },
   {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/sleep-well-capsules"
+    "brand": "Vitabox",
+    "url": "https://shop.vitabox.com.tw/products/c3-curcumin"
   },
   {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/pharmacy-vitamin-czinc-powder"
+    "brand": "Vitabox",
+    "url": "https://shop.vitabox.com.tw/products/multivitamin"
   },
   {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/400-probiotic-powder"
+    "brand": "Vitabox",
+    "url": "https://shop.vitabox.com.tw/products/cranberry"
   },
   {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/snq-lutien-vitaminb"
+    "brand": "Vitabox",
+    "url": "https://shop.vitabox.com.tw/products/enzyme"
   },
   {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/turmeric-artichoke-plant"
+    "brand": "Vitabox",
+    "url": "https://shop.vitabox.com.tw/products/white-kidney-bean-extract-african-mango-seed-sod-enzymes"
   },
   {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/pharmacy-refreshing-collagen"
+    "brand": "Vitabox",
+    "url": "https://shop.vitabox.com.tw/products/lp28-probiotics"
   },
   {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/cranberry-extraction-secrect-care-probiotics-plant-capsule-30"
+    "brand": "Vitabox",
+    "url": "https://shop.vitabox.com.tw/products/zinc"
   },
   {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/vitamind-tabletpurec"
+    "brand": "Vitabox",
+    "url": "https://shop.vitabox.com.tw/products/calcium-algae"
   },
   {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/sugar-free-q-multivitamin-gummies"
+    "brand": "Vitabox",
+    "url": "https://shop.vitabox.com.tw/products/lactobacillus"
   },
   {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/pure-collagen-powder"
+    "brand": "Vitabox",
+    "url": "https://shop.vitabox.com.tw/products/algaeoil-omega-3"
   },
   {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/lp28-probictis-chewing-candy"
+    "brand": "Vitabox",
+    "url": "https://shop.vitabox.com.tw/products/female-bcomplex"
   },
   {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/pure-glutathione"
+    "brand": "Vitabox",
+    "url": "https://shop.vitabox.com.tw/products/luteinplus"
   },
   {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/yohopowerwell"
+    "brand": "Vitabox",
+    "url": "https://shop.vitabox.com.tw/products/nmn"
   },
   {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/red-envelope"
+    "brand": "Vitabox",
+    "url": "https://shop.vitabox.com.tw/products/eco-bag"
   },
   {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/pharmacy-cranberry"
+    "brand": "Vitabox",
+    "url": "https://shop.vitabox.com.tw/products/simple-bag"
   },
   {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/vitaminc-zn-tablet"
+    "brand": "Vitabox",
+    "url": "https://shop.vitabox.com.tw/products/twk10-probiotic"
   },
   {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/fish-and-krill-oil-softgel"
+    "brand": "Vitabox",
+    "url": "https://shop.vitabox.com.tw/products/vitamin-d"
   },
   {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/soybean-extract-capsules-21111"
+    "brand": "Vitabox",
+    "url": "https://shop.vitabox.com.tw/products/lutein"
   },
   {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/probiotic-mask"
+    "brand": "Vitabox",
+    "url": "https://shop.vitabox.com.tw/products/maca-damiana"
   },
   {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/pharmacy-kids-wellmune"
+    "brand": "Vitabox",
+    "url": "https://shop.vitabox.com.tw/products/prenatal-calcium"
   },
   {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/red-yeast-natto-q10-capsules"
+    "brand": "Vitabox",
+    "url": "https://shop.vitabox.com.tw/products/kid-lp28-probiotics"
   },
   {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/echinacea-mouth-spray-adult"
-  },
-  {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/pharmacy-kids-lutein"
-  },
-  {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/collagen-vitaminc-gummies"
-  },
-  {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/5billion-probiotics"
-  },
-  {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/candy-12pcs"
-  },
-  {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/yoho-allerclean-probiotics-kids-lutein"
-  },
-  {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/red-yeast-natto-q10-capsules-3set"
-  },
-  {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/yoho-allerclean-probiotics-original-taste-5"
-  },
-  {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/macarootsominifera"
-  },
-  {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/pharmacy-marigold-extract-lutein"
-  },
-  {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/lp28-plus-4th"
-  },
-  {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/super-folate-iron-plant-capsule-for-heart"
-  },
-  {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/lp28-plus-4th-3pcs"
-  },
-  {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/psk-body-wash"
-  },
-  {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/bpower-2"
-  },
-  {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/young-leaves-drinks"
-  },
-  {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/pharmacy-turmeric"
-  },
-  {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/mosquito-repellent"
-  },
-  {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/yoho-kids-fiber-jelly"
-  },
-  {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/vitamind-tablet-1"
-  },
-  {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/daily-allerclear-probiotics-pineapple-flavor"
-  },
-  {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/psk-body-lotion"
-  },
-  {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/golden-fish-oil-soft-capsule-60"
-  },
-  {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/pharmacy-yoho-vitamin"
-  },
-  {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/pharmacy-kids-calcium"
-  },
-  {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/podcast-book"
-  },
-  {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/cpfoods-1"
-  },
-  {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/handsanitizer-50ml"
-  },
-  {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/natural-calciumvitamin-d3"
-  },
-  {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/vitaminc-chewing-candy-for-kids-caramel-flavor"
-  },
-  {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/yoho-allerclean-probiotics-original-taste"
-  },
-  {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/pharmacy-women-multivitamin"
-  },
-  {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/vitamin-czinc-powder"
-  },
-  {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/4-proteins-choline-powder"
-  },
-  {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/pharmacy-bpower"
-  },
-  {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/pharmacy-uc-iiha"
-  },
-  {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/cranberry-extraction-secrect-care-probiotics-plant-capsule"
-  },
-  {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/uc2-ha-capsules"
-  },
-  {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/pure-vitamin-c"
-  },
-  {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/30billion-probiotics"
-  },
-  {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/pharmacy-300-probiotic"
-  },
-  {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/vitamind-tablet"
-  },
-  {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/cranberry-extraction-secrect-care-probiotics-plant-capsule-1"
-  },
-  {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/maca-arginine-powder-20"
-  },
-  {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/pharmacy-men-multivitamin"
-  },
-  {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/beautyskin18-probiotics-collagen-1"
-  },
-  {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/soybean-extract-capsules"
-  },
-  {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/yoho-kids-lutein-chewable-tablets-10"
-  },
-  {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/floraglo-lutein-astalif-astaxanthin-soft-capsule"
-  },
-  {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/echinacea-tea"
-  },
-  {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/pharmacy-soybean"
-  },
-  {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/bitter-melon-peptide-capsule-3pcs"
-  },
-  {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/pharmacy-vitamind-tablet"
-  },
-  {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/bcd"
-  },
-  {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/echinacea-jelly"
-  },
-  {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/bitter-melon-peptide-capsule-60"
-  },
-  {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/pure-vitamin-c-3pic"
-  },
-  {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/drann-feminine-wash-plus"
-  },
-  {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/pharmacy-red-yeast-rice"
-  },
-  {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/pharmacy-bitter-melon-peptide"
-  },
-  {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/pure-lutein-softgels"
-  },
-  {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/handsanitizer-100ml"
-  },
-  {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/allerclean-shin-probiotics"
-  },
-  {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/yoho-kids-wellmune-chewable-tablets-1"
-  },
-  {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/pharmacy-yohopowerwell"
-  },
-  {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/pharmacy-golden-fish-oil"
-  },
-  {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/red-envelope-2025"
-  },
-  {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/sugar-free-q-probiotics-gummies"
-  },
-  {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/lutein-chewing-candy-for-kids-grape-flavor"
-  },
-  {
-    "brand": "悠活原力",
-    "url": "https://www.yohopower.tw/products/iron-capsule"
-  },
-  {
-    "brand": "大研生醫",
-    "url": "https://www.daikenshop.com/product.php?code=4710255451088"
-  },
-  {
-    "brand": "大研生醫",
-    "url": "https://www.daikenshop.com/product.php?code=4710255450951"
-  },
-  {
-    "brand": "大研生醫",
-    "url": "https://www.daikenshop.com/product.php?code=4710255450739"
-  },
-  {
-    "brand": "大研生醫",
-    "url": "https://www.daikenshop.com/product.php?code=4710255450654"
-  },
-  {
-    "brand": "大研生醫",
-    "url": "https://www.daikenshop.com/product.php?code=4710255450883"
-  },
-  {
-    "brand": "大研生醫",
-    "url": "https://www.daikenshop.com/product.php?code=4710255450821"
-  },
-  {
-    "brand": "大研生醫",
-    "url": "https://www.daikenshop.com/product.php?code=0000000001100"
-  },
-  {
-    "brand": "大研生醫",
-    "url": "https://www.daikenshop.com/product.php?code=4710255450777"
-  },
-  {
-    "brand": "大研生醫",
-    "url": "https://www.daikenshop.com/product.php?code=4710255451187"
-  },
-  {
-    "brand": "大研生醫",
-    "url": "https://www.daikenshop.com/product.php?code=4710255451149"
-  },
-  {
-    "brand": "大研生醫",
-    "url": "https://www.daikenshop.com/product.php?code=4710255450371"
-  },
-  {
-    "brand": "大研生醫",
-    "url": "https://www.daikenshop.com/product.php?code=4710255450043"
-  },
-  {
-    "brand": "大研生醫",
-    "url": "https://www.daikenshop.com/product.php?code=4710255450500"
-  },
-  {
-    "brand": "大研生醫",
-    "url": "https://www.daikenshop.com/product.php?code=4710255450418"
-  },
-  {
-    "brand": "大研生醫",
-    "url": "https://www.daikenshop.com/product.php?code=4710255451163"
-  },
-  {
-    "brand": "大研生醫",
-    "url": "https://www.daikenshop.com/product.php?code=4595056949060"
-  },
-  {
-    "brand": "大研生醫",
-    "url": "https://www.daikenshop.com/product.php?code=4710255450678"
-  },
-  {
-    "brand": "大研生醫",
-    "url": "https://www.daikenshop.com/product.php?code=4710255450616"
-  },
-  {
-    "brand": "大研生醫",
-    "url": "https://www.daikenshop.com/product.php?code=4710255450050"
-  },
-  {
-    "brand": "大研生醫",
-    "url": "https://www.daikenshop.com/product.php?code=4710255450852"
-  },
-  {
-    "brand": "大研生醫",
-    "url": "https://www.daikenshop.com/product.php?code=4710255451132"
-  },
-  {
-    "brand": "大研生醫",
-    "url": "https://www.daikenshop.com/product.php?code=4710255450838"
-  },
-  {
-    "brand": "大研生醫",
-    "url": "https://www.daikenshop.com/product.php?code=0000000000028"
-  },
-  {
-    "brand": "大研生醫",
-    "url": "https://www.daikenshop.com/product.php?code=4710255450692"
-  },
-  {
-    "brand": "大研生醫",
-    "url": "https://www.daikenshop.com/product.php?code=4710255450067"
-  },
-  {
-    "brand": "大研生醫",
-    "url": "https://www.daikenshop.com/product.php?code=4710255451125"
-  },
-  {
-    "brand": "大研生醫",
-    "url": "https://www.daikenshop.com/product.php?code=4710255450524"
-  },
-  {
-    "brand": "大研生醫",
-    "url": "https://www.daikenshop.com/product.php?code=0000000001044"
-  },
-  {
-    "brand": "大研生醫",
-    "url": "https://www.daikenshop.com/product.php?code=4710255450456"
-  },
-  {
-    "brand": "大研生醫",
-    "url": "https://www.daikenshop.com/product.php?code=4710255451170"
-  },
-  {
-    "brand": "大研生醫",
-    "url": "https://www.daikenshop.com/product.php?code=4710255451194"
-  },
-  {
-    "brand": "大研生醫",
-    "url": "https://www.daikenshop.com/product.php?code=4710255450289"
-  },
-  {
-    "brand": "大研生醫",
-    "url": "https://www.daikenshop.com/product.php?code=4710255450647"
-  },
-  {
-    "brand": "大研生醫",
-    "url": "https://www.daikenshop.com/product.php?code=4710255450920"
-  },
-  {
-    "brand": "大研生醫",
-    "url": "https://www.daikenshop.com/product.php?code=4710255450388"
-  },
-  {
-    "brand": "大研生醫",
-    "url": "https://www.daikenshop.com/product.php?code=4710255450661"
-  },
-  {
-    "brand": "大研生醫",
-    "url": "https://www.daikenshop.com/product.php?code=4710255451231"
-  },
-  {
-    "brand": "大研生醫",
-    "url": "https://www.daikenshop.com/product.php?code=4710255450074"
-  },
-  {
-    "brand": "大研生醫",
-    "url": "https://www.daikenshop.com/product.php?code=4710255451040"
-  },
-  {
-    "brand": "大研生醫",
-    "url": "https://www.daikenshop.com/product.php?code=4710255451101"
-  },
-  {
-    "brand": "大研生醫",
-    "url": "https://www.daikenshop.com/product.php?code=4710255450975"
-  },
-  {
-    "brand": "大研生醫",
-    "url": "https://www.daikenshop.com/product.php?code=4710255450333"
-  },
-  {
-    "brand": "大研生醫",
-    "url": "https://www.daikenshop.com/product.php?code=4710255450869"
-  },
-  {
-    "brand": "大研生醫",
-    "url": "https://www.daikenshop.com/product.php?code=4710255450890"
-  },
-  {
-    "brand": "大研生醫",
-    "url": "https://www.daikenshop.com/product.php?code=4710255450968"
-  },
-  {
-    "brand": "大研生醫",
-    "url": "https://www.daikenshop.com/product.php?code=4710255450319"
-  },
-  {
-    "brand": "大研生醫",
-    "url": "https://www.daikenshop.com/product.php?code=4710255450265"
-  },
-  {
-    "brand": "大研生醫",
-    "url": "https://www.daikenshop.com/product.php?code=4710255450593"
-  },
-  {
-    "brand": "大研生醫",
-    "url": "https://www.daikenshop.com/product.php?code=4710255450814"
-  },
-  {
-    "brand": "大研生醫",
-    "url": "https://www.daikenshop.com/product.php?code=4710255450272"
-  },
-  {
-    "brand": "大研生醫",
-    "url": "https://www.daikenshop.com/product.php?code=4710255450937"
-  },
-  {
-    "brand": "大研生醫",
-    "url": "https://www.daikenshop.com/product.php?code=4710255450036"
-  },
-  {
-    "brand": "大研生醫",
-    "url": "https://www.daikenshop.com/product.php?code=4595056949015"
-  },
-  {
-    "brand": "大研生醫",
-    "url": "https://www.daikenshop.com/product.php?code=4710255450364"
-  },
-  {
-    "brand": "大研生醫",
-    "url": "https://www.daikenshop.com/product.php?code=4710255450807"
-  },
-  {
-    "brand": "大研生醫",
-    "url": "https://www.daikenshop.com/product.php?code=4710255450722"
-  },
-  {
-    "brand": "大研生醫",
-    "url": "https://www.daikenshop.com/product.php?code=4710255450753"
-  },
-  {
-    "brand": "大研生醫",
-    "url": "https://www.daikenshop.com/product.php?code=0000000000117"
-  },
-  {
-    "brand": "大研生醫",
-    "url": "https://www.daikenshop.com/product.php?code=4710255450845"
-  },
-  {
-    "brand": "大研生醫",
-    "url": "https://www.daikenshop.com/product.php?code=4710255450302"
-  },
-  {
-    "brand": "大研生醫",
-    "url": "https://www.daikenshop.com/product.php?code=4710255450760"
-  },
-  {
-    "brand": "大研生醫",
-    "url": "https://www.daikenshop.com/product.php?code=4710255451064"
-  },
-  {
-    "brand": "大研生醫",
-    "url": "https://www.daikenshop.com/product.php?code=4710255451095"
-  },
-  {
-    "brand": "大研生醫",
-    "url": "https://www.daikenshop.com/product.php?code=4710255450173"
-  },
-  {
-    "brand": "大研生醫",
-    "url": "https://www.daikenshop.com/product.php?code=4710255450487"
-  },
-  {
-    "brand": "營養師輕食",
-    "url": "https://www.dietician.com.tw/products/item/1043-probiotics.html"
-  },
-  {
-    "brand": "營養師輕食",
-    "url": "https://www.dietician.com.tw/pre-order/item/1487-sleep.html"
-  },
-  {
-    "brand": "營養師輕食",
-    "url": "https://www.dietician.com.tw/products/item/1505-sleep.html"
-  },
-  {
-    "brand": "營養師輕食",
-    "url": "https://www.dietician.com.tw/products/item/1031-fishoil.html"
-  },
-  {
-    "brand": "營養師輕食",
-    "url": "https://www.dietician.com.tw/products/item/1149-cranberry.html"
-  },
-  {
-    "brand": "營養師輕食",
-    "url": "https://www.dietician.com.tw/products/item/1646-vitac.html"
-  },
-  {
-    "brand": "營養師輕食",
-    "url": "https://www.dietician.com.tw/products/item/1146-poog.html"
-  },
-  {
-    "brand": "營養師輕食",
-    "url": "https://www.dietician.com.tw/products/item/1145-enzyme.html"
-  },
-  {
-    "brand": "營養師輕食",
-    "url": "https://www.dietician.com.tw/products/item/1019-vitamin-b.html"
-  },
-  {
-    "brand": "營養師輕食",
-    "url": "https://www.dietician.com.tw/products/item/1147-hyaluronic.html"
-  },
-  {
-    "brand": "營養師輕食",
-    "url": "https://www.dietician.com.tw/products/item/1143-uc2.html"
-  },
-  {
-    "brand": "營養師輕食",
-    "url": "https://www.dietician.com.tw/products/item/1245-ppn6.html"
-  },
-  {
-    "brand": "營養師輕食",
-    "url": "https://www.dietician.com.tw/products/item/1148-nmn.html"
-  },
-  {
-    "brand": "營養師輕食",
-    "url": "https://www.dietician.com.tw/products/item/989-epa.html"
-  },
-  {
-    "brand": "營養師輕食",
-    "url": "https://www.dietician.com.tw/products/item/1021-lutein.html"
-  },
-  {
-    "brand": "營養師輕食",
-    "url": "https://www.dietician.com.tw/products/item/988-ca.html"
+    "brand": "Vitabox",
+    "url": "https://shop.vitabox.com.tw/products/b-complex-maca"
   },
   {
     "brand": "配方時代",
-    "url": "https://healthformula.com.tw/pharmacist-jacob/"
-  },
-  {
-    "brand": "配方時代",
-    "url": "https://healthformula.com.tw/allergy-probiotic-safety-and-patent/"
-  },
-  {
-    "brand": "配方時代",
-    "url": "https://healthformula.com.tw/ca-safety-and-patent/"
-  },
-  {
-    "brand": "配方時代",
-    "url": "https://healthformula.com.tw/2025double12/"
-  },
-  {
-    "brand": "配方時代",
-    "url": "https://healthformula.com.tw/dr-phalloplasty/"
-  },
-  {
-    "brand": "配方時代",
-    "url": "https://healthformula.com.tw/uncategorized/fake-information/"
-  },
-  {
-    "brand": "配方時代",
-    "url": "https://healthformula.com.tw/vitamin-bf-safety-and-patent/"
-  },
-  {
-    "brand": "配方時代",
-    "url": "https://healthformula.com.tw/"
-  },
-  {
-    "brand": "配方時代",
-    "url": "https://healthformula.com.tw/gaba-safety-and-patent/"
-  },
-  {
-    "brand": "配方時代",
-    "url": "https://healthformula.com.tw/maca-safety-and-patent/"
-  },
-  {
-    "brand": "配方時代",
-    "url": "https://healthformula.com.tw/%e4%b8%89%e5%80%8d%e8%88%92%e6%95%8f%e7%9b%8a%e7%94%9f%e8%8f%8c%ef%bd%9c%e5%b0%88%e7%82%ba%e3%80%90%e8%aa%bf%e6%95%b4%e9%ab%94%e8%b3%aa%e9%9c%80%e6%b1%82%e3%80%91%e8%a8%ad%e8%a8%88%ef%bc%8c-4/"
+    "url": "https://healthformula.com.tw/uc2/"
   },
   {
     "brand": "配方時代",
@@ -873,27 +129,27 @@
   },
   {
     "brand": "配方時代",
-    "url": "https://healthformula.com.tw/certifications/"
+    "url": "https://healthformula.com.tw/gaba-safety-and-patent/"
   },
   {
     "brand": "配方時代",
-    "url": "https://healthformula.com.tw/affordable/"
+    "url": "https://healthformula.com.tw/2024double12-result/"
   },
   {
     "brand": "配方時代",
-    "url": "https://healthformula.com.tw/enough/"
+    "url": "https://healthformula.com.tw/renee/"
   },
   {
     "brand": "配方時代",
-    "url": "https://healthformula.com.tw/2024-fathersday-result/"
+    "url": "https://healthformula.com.tw/fishoil/"
   },
   {
     "brand": "配方時代",
-    "url": "https://healthformula.com.tw/2025mothersday-result/"
+    "url": "https://healthformula.com.tw/fishoil-safety-and-patent/"
   },
   {
     "brand": "配方時代",
-    "url": "https://healthformula.com.tw/probiotic/"
+    "url": "https://healthformula.com.tw/lutein-safety-and-patent/"
   },
   {
     "brand": "配方時代",
@@ -901,15 +157,31 @@
   },
   {
     "brand": "配方時代",
-    "url": "https://healthformula.com.tw/nutritionist-ting/"
+    "url": "https://healthformula.com.tw/engineer-molly/"
   },
   {
     "brand": "配方時代",
-    "url": "https://healthformula.com.tw/uc2-safety-and-patent/"
+    "url": "https://healthformula.com.tw/pharmacist-jacob/"
   },
   {
     "brand": "配方時代",
-    "url": "https://healthformula.com.tw/reviews/"
+    "url": "https://healthformula.com.tw/probiotic-safety-and-patent/"
+  },
+  {
+    "brand": "配方時代",
+    "url": "https://healthformula.com.tw/royaljelly/"
+  },
+  {
+    "brand": "配方時代",
+    "url": "https://healthformula.com.tw/vitamin-bm/"
+  },
+  {
+    "brand": "配方時代",
+    "url": "https://healthformula.com.tw/2025thanku-festival-result/"
+  },
+  {
+    "brand": "配方時代",
+    "url": "https://healthformula.com.tw/editorial-policy/"
   },
   {
     "brand": "配方時代",
@@ -917,7 +189,47 @@
   },
   {
     "brand": "配方時代",
+    "url": "https://healthformula.com.tw/2025anniversary-result/"
+  },
+  {
+    "brand": "配方時代",
+    "url": "https://healthformula.com.tw/2024-fathersday-result/"
+  },
+  {
+    "brand": "配方時代",
+    "url": "https://healthformula.com.tw/vitamin-bm-safety-and-patent/"
+  },
+  {
+    "brand": "配方時代",
+    "url": "https://healthformula.com.tw/allergy-probiotic-safety-and-patent/"
+  },
+  {
+    "brand": "配方時代",
     "url": "https://healthformula.com.tw/2025double12-result/"
+  },
+  {
+    "brand": "配方時代",
+    "url": "https://healthformula.com.tw/uncategorized/fake-products/"
+  },
+  {
+    "brand": "配方時代",
+    "url": "https://healthformula.com.tw/nutritionist-ting/"
+  },
+  {
+    "brand": "配方時代",
+    "url": "https://healthformula.com.tw/ca-safety-and-patent/"
+  },
+  {
+    "brand": "配方時代",
+    "url": "https://healthformula.com.tw/affordable/"
+  },
+  {
+    "brand": "配方時代",
+    "url": "https://healthformula.com.tw/newfriend/"
+  },
+  {
+    "brand": "配方時代",
+    "url": "https://healthformula.com.tw/2026cny/"
   },
   {
     "brand": "配方時代",
@@ -925,11 +237,63 @@
   },
   {
     "brand": "配方時代",
-    "url": "https://healthformula.com.tw/lutein/"
+    "url": "https://healthformula.com.tw/"
   },
   {
     "brand": "配方時代",
-    "url": "https://healthformula.com.tw/2025thanku-festival-result/"
+    "url": "https://healthformula.com.tw/2026year-end-sale/"
+  },
+  {
+    "brand": "配方時代",
+    "url": "https://healthformula.com.tw/uc2-safety-and-patent/"
+  },
+  {
+    "brand": "配方時代",
+    "url": "https://healthformula.com.tw/%e4%b8%89%e5%80%8d%e8%88%92%e6%95%8f%e7%9b%8a%e7%94%9f%e8%8f%8c%ef%bd%9c%e5%b0%88%e7%82%ba%e3%80%90%e8%aa%bf%e6%95%b4%e9%ab%94%e8%b3%aa%e9%9c%80%e6%b1%82%e3%80%91%e8%a8%ad%e8%a8%88%ef%bc%8c-4/"
+  },
+  {
+    "brand": "配方時代",
+    "url": "https://healthformula.com.tw/materials/"
+  },
+  {
+    "brand": "配方時代",
+    "url": "https://healthformula.com.tw/maca-safety-and-patent/"
+  },
+  {
+    "brand": "配方時代",
+    "url": "https://healthformula.com.tw/probiotic/"
+  },
+  {
+    "brand": "配方時代",
+    "url": "https://healthformula.com.tw/ca/"
+  },
+  {
+    "brand": "配方時代",
+    "url": "https://healthformula.com.tw/uncategorized/fake-information/"
+  },
+  {
+    "brand": "配方時代",
+    "url": "https://healthformula.com.tw/2025fathersday-result/"
+  },
+  {
+    "brand": "配方時代",
+    "url": "https://healthformula.com.tw/reviews/"
+  },
+  {
+    "brand": "配方時代",
+    "url": "https://healthformula.com.tw/?wpr_mega_menu=wpr-mega-menu-item-19379"
+  },
+  {
+    "brand": "配方時代",
+    "url": "https://healthformula.com.tw/2025double12/"
+  },
+  {
+    "brand": "配方時代",
+    "url": "https://healthformula.com.tw/bittermelon-safety-and-patent/"
+  },
+  {
+    "brand": "配方時代",
+    "url": "https://healthformula.com.tw/lutein/"
   },
   {
     "brand": "配方時代",
@@ -941,35 +305,19 @@
   },
   {
     "brand": "配方時代",
-    "url": "https://healthformula.com.tw/uc2/"
-  },
-  {
-    "brand": "配方時代",
-    "url": "https://healthformula.com.tw/fishoil/"
-  },
-  {
-    "brand": "配方時代",
-    "url": "https://healthformula.com.tw/ca/"
-  },
-  {
-    "brand": "配方時代",
-    "url": "https://healthformula.com.tw/lutein-safety-and-patent/"
-  },
-  {
-    "brand": "配方時代",
-    "url": "https://healthformula.com.tw/2024-mothersday-result/"
-  },
-  {
-    "brand": "配方時代",
     "url": "https://healthformula.com.tw/collagen-safety-and-patent/"
   },
   {
     "brand": "配方時代",
-    "url": "https://healthformula.com.tw/2026year-end-sale/"
+    "url": "https://healthformula.com.tw/dr-phalloplasty/"
   },
   {
     "brand": "配方時代",
-    "url": "https://healthformula.com.tw/royaljelly/"
+    "url": "https://healthformula.com.tw/certifications/"
+  },
+  {
+    "brand": "配方時代",
+    "url": "https://healthformula.com.tw/vitamin-bf-safety-and-patent/"
   },
   {
     "brand": "配方時代",
@@ -977,15 +325,11 @@
   },
   {
     "brand": "配方時代",
-    "url": "https://healthformula.com.tw/bittermelon-safety-and-patent/"
+    "url": "https://healthformula.com.tw/gaba-complex/"
   },
   {
     "brand": "配方時代",
-    "url": "https://healthformula.com.tw/2025anniversary-result/"
-  },
-  {
-    "brand": "配方時代",
-    "url": "https://healthformula.com.tw/vitamin-bm/"
+    "url": "https://healthformula.com.tw/enough/"
   },
   {
     "brand": "配方時代",
@@ -993,58 +337,10 @@
   },
   {
     "brand": "配方時代",
-    "url": "https://healthformula.com.tw/materials/"
+    "url": "https://healthformula.com.tw/2025mothersday-result/"
   },
   {
     "brand": "配方時代",
-    "url": "https://healthformula.com.tw/vitamin-bm-safety-and-patent/"
-  },
-  {
-    "brand": "配方時代",
-    "url": "https://healthformula.com.tw/probiotic-safety-and-patent/"
-  },
-  {
-    "brand": "配方時代",
-    "url": "https://healthformula.com.tw/fishoil-safety-and-patent/"
-  },
-  {
-    "brand": "配方時代",
-    "url": "https://healthformula.com.tw/newfriend/"
-  },
-  {
-    "brand": "配方時代",
-    "url": "https://healthformula.com.tw/2025fathersday-result/"
-  },
-  {
-    "brand": "配方時代",
-    "url": "https://healthformula.com.tw/uncategorized/fake-products/"
-  },
-  {
-    "brand": "配方時代",
-    "url": "https://healthformula.com.tw/gaba-complex/"
-  },
-  {
-    "brand": "配方時代",
-    "url": "https://healthformula.com.tw/editorial-policy/"
-  },
-  {
-    "brand": "配方時代",
-    "url": "https://healthformula.com.tw/?wpr_mega_menu=wpr-mega-menu-item-19379"
-  },
-  {
-    "brand": "配方時代",
-    "url": "https://healthformula.com.tw/renee/"
-  },
-  {
-    "brand": "配方時代",
-    "url": "https://healthformula.com.tw/2026cny/"
-  },
-  {
-    "brand": "配方時代",
-    "url": "https://healthformula.com.tw/2024double12-result/"
-  },
-  {
-    "brand": "配方時代",
-    "url": "https://healthformula.com.tw/engineer-molly/"
+    "url": "https://healthformula.com.tw/2024-mothersday-result/"
   }
 ]

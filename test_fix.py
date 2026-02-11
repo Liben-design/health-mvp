@@ -4,7 +4,7 @@ from data.sitemap_parser import SitemapParser
 
 # 測試 1: Vitabox 價格
 scanner = D2CScanner()
-vitabox_res = scanner.scan_url("https://shop.vitabox.com.tw/products/lutein-z")
+vitabox_res = scanner.scan_url("https://shop.vitabox.com.tw/products/lutein")
 print(f"Vitabox Price: {(vitabox_res or {}).get('price')}")
 
 # 測試 2: 配方時代過濾

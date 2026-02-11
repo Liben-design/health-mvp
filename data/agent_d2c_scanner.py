@@ -54,7 +54,7 @@ class AgentD2CScanner:
 
         # Vitabox / Shopline 優先等待較精準的組合
         if "vitabox" in url or "shopline" in url:
-            prioritized = ".price-regular .price, .js-price .price, .product-price, .price"
+            prioritized = ".same-price .price, .price-regular .price, .js-price .price, .product-price, .price"
             try:
                 await page.wait_for_selector(prioritized, state="visible", timeout=10000)
                 return
@@ -72,6 +72,8 @@ class AgentD2CScanner:
     async def _extract_price_from_dom(self, page):
         """DOM 優先策略：先直接抽價格，若成功可覆蓋 LLM 價格。"""
         selectors = [
+            ".same-price .price",
+            ".same-price .price-regular .price",
             ".price-regular .price",
             ".js-price .price",
             ".price-sale .price",
@@ -334,6 +336,12 @@ class AgentD2CScanner:
                 # 抓取基礎資料 (圖片與 HTML)
                 content = await page.content()
                 html_price = self._extract_price_from_html_content(content)
+                if html_price == 0 and dom_price == 0 and ("vitabox" in url or "shopline" in url):
+                    try:
+                        with open("debug_vitabox_page.html", "w", encoding="utf-8") as f:
+                            f.write(content)
+                    except Exception as e:
+                        print(f"⚠️ [Agent] 無法寫入 Vitabox debug HTML: {e}")
                 
                 # 嘗試抓取 og:image
                 image_url = await page.get_attribute("meta[property='og:image']", "content")
