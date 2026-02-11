@@ -33,13 +33,35 @@ async def main():
     # 2. 初始化掃描器
     scanner = AgentD2CScanner()
     all_data = []
+    scanned_urls = set()
+
+    # [New] 斷點續傳：讀取已存在的 CSV，避免重複掃描
+    if os.path.exists(output_csv):
+        try:
+            existing_df = pd.read_csv(output_csv)
+            all_data = existing_df.to_dict('records')
+            scanned_urls = set(existing_df['url'].tolist())
+            print(f"📂 發現已存檔資料: {len(all_data)} 筆，將跳過這些網址。")
+        except Exception as e:
+            print(f"⚠️ 讀取舊檔失敗: {e}，將重新開始。")
     
     # 3. 批次執行 (避免一次性請求過多導致被封鎖或記憶體不足)
     batch_size = 5
-    for i in range(0, total_urls, batch_size):
-        batch_urls = urls_to_scan[i : i + batch_size]
+    
+    # 過濾掉已掃描的 URL
+    pending_urls = [u for u in urls_to_scan if u not in scanned_urls]
+    total_pending = len(pending_urls)
+    
+    if total_pending == 0:
+        print("✅ 所有目標皆已掃描完成！")
+        return
+
+    print(f"🚀 尚有 {total_pending} 個產品待掃描...")
+
+    for i in range(0, total_pending, batch_size):
+        batch_urls = pending_urls[i : i + batch_size]
         current_batch_num = (i // batch_size) + 1
-        total_batches = (total_urls + batch_size - 1) // batch_size
+        total_batches = (total_pending + batch_size - 1) // batch_size
         
         print(f"\n📦 [Batch {current_batch_num}/{total_batches}] 處理中 ({len(batch_urls)} items)...")
         
@@ -60,7 +82,7 @@ async def main():
         save_to_csv(all_data, output_csv)
         
         # 批次間休息，降低被封鎖風險
-        if i + batch_size < total_urls:
+        if i + batch_size < total_pending:
             print("⏳ 冷卻 3 秒...")
             await asyncio.sleep(3)
 

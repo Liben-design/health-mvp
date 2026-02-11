@@ -3,6 +3,7 @@ import os
 import json
 import random
 import re
+import html as html_lib
 from bs4 import BeautifulSoup
 from playwright.async_api import async_playwright
 from playwright_stealth import stealth_async
@@ -20,11 +21,110 @@ class AgentD2CScanner:
     """
     def __init__(self):
         self.api_key = os.environ.get("GOOGLE_API_KEY")
+        self.llm_timeout_seconds = int(os.environ.get("D2C_LLM_TIMEOUT", "15"))
         if not self.api_key:
             print("⚠️ [Agent] 未設定 GOOGLE_API_KEY，AI 分析將失效。")
         else:
             genai.configure(api_key=self.api_key)
             self.model = genai.GenerativeModel('gemini-2.0-flash', generation_config={"response_mime_type": "application/json"})
+
+    @staticmethod
+    def _normalize_url(url):
+        """容錯處理：支援純網址與 Markdown 格式 `[url](url)`。"""
+        if not isinstance(url, str):
+            return ""
+        url = url.strip()
+        md_match = re.search(r'\((https?://[^\s)]+)\)', url)
+        if md_match:
+            return md_match.group(1)
+        raw_match = re.search(r'https?://[^\s\]]+', url)
+        if raw_match:
+            return raw_match.group(0)
+        return url
+
+    async def _wait_for_price_elements(self, page, url):
+        """在 dump HTML 前先等待價格 DOM 渲染，提升動態站價格命中率。"""
+        selector_candidates = [
+            ".price",
+            ".product-price",
+            "div[class*='price']",
+            ".price-regular .price",
+            ".js-price .price"
+        ]
+
+        # Vitabox / Shopline 優先等待較精準的組合
+        if "vitabox" in url or "shopline" in url:
+            prioritized = ".price-regular .price, .js-price .price, .product-price, .price"
+            try:
+                await page.wait_for_selector(prioritized, state="visible", timeout=10000)
+                return
+            except:
+                pass
+
+        # 通用 fallback：逐一等待，多一層保險
+        for selector in selector_candidates:
+            try:
+                await page.wait_for_selector(selector, state="attached", timeout=3500)
+                return
+            except:
+                continue
+
+    async def _extract_price_from_dom(self, page):
+        """DOM 優先策略：先直接抽價格，若成功可覆蓋 LLM 價格。"""
+        selectors = [
+            ".price-regular .price",
+            ".js-price .price",
+            ".price-sale .price",
+            ".product-price",
+            ".special-price",
+            "div[class*='price']",
+            "span.price",
+            "div.price",
+            ".price"
+        ]
+
+        for selector in selectors:
+            try:
+                locator = page.locator(selector)
+                count = await locator.count()
+                if count == 0:
+                    continue
+
+                # 只檢查前幾個元素，避免抓太慢
+                check_n = min(count, 8)
+                for i in range(check_n):
+                    el = locator.nth(i)
+                    if not await el.is_visible():
+                        continue
+                    p_text = (await el.text_content() or "").strip()
+                    if not any(c.isdigit() for c in p_text):
+                        continue
+                    p_val = int(re.sub(r'[^\d]', '', p_text) or 0)
+                    # 合理價格區間，避免誤抓評分/件數
+                    if 100 <= p_val <= 200000:
+                        return p_val
+            except:
+                continue
+
+        # Fallback：全文找 NT$ / TWD / $
+        try:
+            body_text = await page.locator("body").text_content() or ""
+            matches = re.findall(r'(?:NT\$|TWD\s*|\$)\s*(\d{1,3}(?:,\d{3})+|\d{3,6})', body_text)
+            for m in matches:
+                val = int(m.replace(',', ''))
+                if 100 <= val <= 200000:
+                    return val
+        except:
+            pass
+
+        return 0
+
+    @staticmethod
+    def _looks_like_product_url(url):
+        """URL 層級的產品判斷，避免部分站台缺少 og:type 時被誤判。"""
+        u = (url or "").lower()
+        product_tokens = ["/product", "/products", "/shop/", "lutein", "fish-oil", "probiotic"]
+        return any(t in u for t in product_tokens)
 
     async def analyze_with_llm(self, html_content, url):
         """呼叫 Gemini 進行語義分析"""
@@ -53,7 +153,10 @@ class AgentD2CScanner:
         """
 
         try:
-            response = await self.model.generate_content_async(prompt)
+            response = await asyncio.wait_for(
+                self.model.generate_content_async(prompt),
+                timeout=self.llm_timeout_seconds
+            )
             text = response.text
             
             # 清洗 Markdown 標記 (```json ... ```)
@@ -69,12 +172,116 @@ class AgentD2CScanner:
                 data = data[0] if data else {}
                 
             return data
+        except asyncio.TimeoutError:
+            print(f"⚠️ [Agent] LLM 逾時（>{self.llm_timeout_seconds}s），改用非 LLM fallback")
+            return {}
         except Exception as e:
             print(f"⚠️ [Agent] LLM 分析失敗: {e}")
             return {}
 
+    def _extract_basic_info_from_html(self, html_content, url):
+        """LLM 失敗時的最小可用資料。"""
+        title = "Unknown"
+        brand = "Unknown"
+
+        try:
+            soup = BeautifulSoup(html_content or "", 'html.parser')
+            h1 = soup.select_one('h1')
+            og_title = soup.select_one('meta[property="og:title"]')
+            doc_title = soup.title.string.strip() if soup.title and soup.title.string else ""
+
+            title = (
+                (h1.get_text(strip=True) if h1 else "")
+                or (og_title.get('content', '').strip() if og_title else "")
+                or doc_title
+                or "Unknown"
+            )
+
+            if "vitabox" in (url or "").lower() or "vitabox" in title.lower():
+                brand = "Vitabox"
+        except:
+            pass
+
+        return {"brand": brand, "title": title}
+
+    def _extract_price_from_html_content(self, html_content):
+        """
+        第二輪價格策略：直接從 HTML / script 資料層提取價格。
+        優先順序：
+        1) JSON-LD Offer price
+        2) app.value('product', JSON.parse('...')) 中的 price/price_sale/variations
+        """
+        if not html_content:
+            return 0
+
+        # 1) JSON-LD
+        try:
+            soup = BeautifulSoup(html_content, 'html.parser')
+            for tag in soup.select("script[type='application/ld+json']"):
+                raw = (tag.string or tag.text or "").strip()
+                if not raw:
+                    continue
+                try:
+                    data = json.loads(raw)
+                except:
+                    continue
+                payloads = data if isinstance(data, list) else [data]
+                for node in payloads:
+                    if not isinstance(node, dict):
+                        continue
+                    offers = node.get("offers")
+                    if isinstance(offers, dict):
+                        p = offers.get("price")
+                        if isinstance(p, (int, float)) and p > 0:
+                            return int(round(p))
+                        if isinstance(p, str):
+                            val = int(re.sub(r'[^\d]', '', p) or 0)
+                            if val > 0:
+                                return val
+        except:
+            pass
+
+        # 2) Shopline product data from app.value('product', JSON.parse('...'))
+        try:
+            m = re.search(r"app\.value\('product',\s*JSON\.parse\('(.+?)'\)\);", html_content, re.DOTALL)
+            if m:
+                payload = m.group(1)
+                payload = payload.encode('utf-8').decode('unicode_escape')
+                payload = html_lib.unescape(payload)
+                product = json.loads(payload)
+
+                candidates = []
+
+                # 主價
+                for key in ["price_sale", "price", "lowest_member_price"]:
+                    obj = product.get(key) or {}
+                    cents = obj.get("cents", 0)
+                    if isinstance(cents, (int, float)) and cents > 0:
+                        candidates.append(int(cents))
+
+                # variations 價格（取最小正值，通常是顯示價）
+                for v in product.get("variations", []) or []:
+                    if not isinstance(v, dict):
+                        continue
+                    for key in ["price_sale", "price", "member_price"]:
+                        obj = v.get(key) or {}
+                        cents = obj.get("cents", 0)
+                        if isinstance(cents, (int, float)) and cents > 0:
+                            candidates.append(int(cents))
+
+                if candidates:
+                    return min(candidates)
+        except Exception as e:
+            print(f"⚠️ [Agent] HTML 價格解析失敗: {e}")
+
+        return 0
+
     async def scan_url(self, url):
         """掃描單一 URL"""
+        url = self._normalize_url(url)
+        if not url:
+            print("❌ [Agent] 無效 URL，跳過")
+            return None
         print(f"🤖 [Agent] 正在掃描: {url}")
         data = None
         
@@ -99,54 +306,26 @@ class AgentD2CScanner:
                     await asyncio.sleep(10)
                     await page.reload()
                 
-                # [New] 等待價格元素渲染 (針對 Vitabox 等動態網站)
-                try:
-                    # 嘗試等待常見的價格符號或 class
-                    await page.wait_for_selector("text=NT$", timeout=3000)
-                except:
-                    pass # 若沒等到也不要報錯，繼續執行
+                # 等待價格元素渲染 (在 dump HTML 前執行)
+                await self._wait_for_price_elements(page, url)
                 
-                # [New] 第二道濾網 - 動態驗身 (Smart Filter)
+                # 先抓 DOM 價格，供後續產品頁判斷與價格覆蓋
+                dom_price = await self._extract_price_from_dom(page)
+
+                # 第二道濾網 - 動態驗身 (Smart Filter)
                 # 檢查 og:type 或 JSON-LD 是否標記為 Product，避免浪費 AI Token 分析非產品頁
-                is_product = await page.evaluate("""() => {
+                is_product_meta = await page.evaluate("""() => {
                     const ogType = document.querySelector('meta[property="og:type"]')?.content;
                     const jsonLd = Array.from(document.querySelectorAll('script[type="application/ld+json"]'))
                                         .map(el => el.innerText)
                                         .join('');
                     return ogType === 'product' || jsonLd.includes('"@type": "Product"') || jsonLd.includes('"@type":"Product"');
                 }""")
+                is_product = is_product_meta or self._looks_like_product_url(url) or dom_price > 0
                 
                 if not is_product:
                     print(f"⏩ [Agent] 跳過非產品頁面 (無 Product 標記): {url}")
                     return None
-
-                # [New] 嘗試直接從 DOM 提取價格 (彌補 LLM 對動態渲染內容的解析不足)
-                # 針對 Vitabox (Shopline) 結構: <div class="price-regular"><span class="price">NT$1,780</span></div>
-                dom_price = 0
-                try:
-                    price_selectors = [
-                        ".price-regular .price", # Vitabox / Shopline 標準
-                        ".price-sale .price",    # Shopline 特價
-                        ".product-price",        # 通用
-                        ".special-price",        # 通用
-                        "span.price"             # 寬鬆匹配
-                    ]
-                    
-                    for selector in price_selectors:
-                        if await page.locator(selector).count() > 0:
-                            # 找第一個可見且包含數字的元素
-                            elements = await page.locator(selector).all()
-                            for el in elements:
-                                if await el.is_visible():
-                                    p_text = await el.text_content()
-                                    if any(c.isdigit() for c in p_text):
-                                        p_val = int(re.sub(r'[^\d]', '', p_text) or 0)
-                                        if p_val > 0:
-                                            dom_price = p_val
-                                            break
-                            if dom_price > 0: break
-                except Exception as e:
-                    print(f"⚠️ DOM 價格提取失敗: {e}")
 
                 # 滾動頁面觸發 Lazy Load
                 await page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
@@ -154,6 +333,7 @@ class AgentD2CScanner:
 
                 # 抓取基礎資料 (圖片與 HTML)
                 content = await page.content()
+                html_price = self._extract_price_from_html_content(content)
                 
                 # 嘗試抓取 og:image
                 image_url = await page.get_attribute("meta[property='og:image']", "content")
@@ -168,26 +348,28 @@ class AgentD2CScanner:
                 
                 # LLM 分析
                 ai_data = await self.analyze_with_llm(content, url)
-                
-                if ai_data:
-                    # 整合資料
-                    final_price = ai_data.get("price", 0)
-                    # 若 AI 沒抓到價格 (0)，但 DOM 有抓到，則使用 DOM 價格
-                    if final_price == 0 and dom_price > 0:
-                        final_price = dom_price
+                basic_data = self._extract_basic_info_from_html(content, url)
 
-                    data = {
-                        "source": "D2C_Hunter", # 標記來源
-                        "brand": ai_data.get("brand", "Unknown"),
-                        "title": ai_data.get("title", "Unknown"),
-                        "price": final_price,
-                        "unit_price": ai_data.get("unit_price", 0),
-                        "total_count": ai_data.get("total_count", 0),
-                        "url": url,
-                        "image_url": image_url or "",
-                        "product_highlights": ai_data.get("product_highlights", "")
-                    }
-                    print(f"✅ [Agent] 成功提取: {data['title']} (${data['price']})")
+                # 整合資料（LLM 成功/失敗都會組裝結果，避免 pending）
+                final_price = (ai_data or {}).get("price", 0)
+                # DOM / HTML script 優先策略：任一有值即覆蓋 LLM
+                if dom_price > 0:
+                    final_price = dom_price
+                elif html_price > 0:
+                    final_price = html_price
+
+                data = {
+                    "source": "D2C_Hunter", # 標記來源
+                    "brand": (ai_data or {}).get("brand") or basic_data.get("brand", "Unknown"),
+                    "title": (ai_data or {}).get("title") or basic_data.get("title", "Unknown"),
+                    "price": int(final_price or 0),
+                    "unit_price": (ai_data or {}).get("unit_price", 0),
+                    "total_count": (ai_data or {}).get("total_count", 0),
+                    "url": url,
+                    "image_url": image_url or "",
+                    "product_highlights": (ai_data or {}).get("product_highlights", "")
+                }
+                print(f"✅ [Agent] 成功提取: {data['title']} (${data['price']})")
                 
             except Exception as e:
                 print(f"❌ [Agent] 掃描失敗 {url}: {e}")
@@ -200,16 +382,26 @@ class AgentD2CScanner:
         """批次掃描"""
         results = []
         # 限制並發數，避免被封鎖
-        semaphore = asyncio.Semaphore(3) 
-        
+        semaphore = asyncio.Semaphore(3)
+
         async def sem_scan(u):
             async with semaphore:
                 return await self.scan_url(u)
 
         tasks = [sem_scan(u) for u in urls]
         scanned = await asyncio.gather(*tasks)
-        
+
         # 過濾失敗的結果
         for res in scanned:
-            if res: results.append(res)
+            if res:
+                results.append(res)
         return results
+
+
+class D2CScanner:
+    """向後相容封裝：提供同步介面，方便腳本直接呼叫。"""
+    def __init__(self):
+        self._scanner = AgentD2CScanner()
+
+    def scan_url(self, url):
+        return asyncio.run(self._scanner.scan_url(url))

@@ -123,13 +123,24 @@ Context 共享：在提供解決方案前，請先讀取 @workspace 中的最新
   - 針對前 5 大品牌 (大研、營養師輕食、Vitabox、配方時代、悠活原力) 進行測試。
   - 成功採集 **169 筆** 有效資料至 `data/d2c_full_database.csv`。
 
+### ✅ 今日完成 (2026/02/07 Phase 3) - D2C 獵人優化與驗收
+- **系統升級**：
+  - `batch_scanner.py`：新增「斷點續傳」功能，避免中斷後重頭開始。
+  - `validate_results.py`：建立自動化驗收腳本，快速分析品牌分佈與異常數據。
+  - `agent_d2c_scanner.py`：
+    - 新增 DOM 價格提取邏輯 (針對 Shopline/Vitabox 動態渲染)。
+    - 增強 JSON 解析容錯能力 (修復 LLM 回傳格式錯誤)。
+- **執行成果**：
+  - 成功採集 **190 筆** 資料。
+  - 識別出 Vitabox 價格為 0 與配方時代 (Health Formula) 全數被過濾的關鍵問題。
+
 ### 🚧 進行中 / 優化中 (In Progress)
-- **全品牌擴展 (Scheduled for Tomorrow)**：
-  - 將 `data/d2c_domains_list.csv` 擴充至 50+ 品牌。
-  - 執行 `sitemap_parser.py` 進行全量連結發現。
-  - 執行 `batch_scanner.py` 進行全量 AI 採集。
+- **Vitabox 價格修復 (Scheduled for Tomorrow)**：
+  - 驗證 DOM 提取邏輯是否生效，解決價格為 0 的問題。
+- **配方時代 (Health Formula) 攻略**：
+  - 調整 Smart Filter 邏輯，解決產品頁被誤判為部落格文章的問題。
 - **前台整合**：
-  - 將 `d2c_full_database.csv` 整合進 `2_lutein_app.py`，實現全網比價。
+  - 將修復後的 `d2c_full_database.csv` 整合進 `2_lutein_app.py`。
 
 ---
 

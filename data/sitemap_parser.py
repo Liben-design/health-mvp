@@ -24,6 +24,19 @@ class SitemapParser:
         
         # [New] 針對特定網域放寬過濾標準 (如配方時代使用自定義 URL，不含 product 前綴)
         self.relaxed_domains = ['healthformula.com.tw']
+        
+        # [New] 網域白名單規則：可覆蓋一般 include/exclude 邏輯
+        # 配方時代 (formula-time) 產品 URL 結構可能不固定，且有時不含 /product/
+        self.domain_whitelist_rules = {
+            "www.formula-time.com": {
+                "allow_patterns": ["/products/", "/product/", "lutein", "fish-oil", "probiotic"],
+                "deny_patterns": ["/blog", "/news", "/article", "/about", "/contact", "/faq", "/policy", "/member", "/cart"]
+            },
+            "formula-time.com": {
+                "allow_patterns": ["/products/", "/product/", "lutein", "fish-oil", "probiotic"],
+                "deny_patterns": ["/blog", "/news", "/article", "/about", "/contact", "/faq", "/policy", "/member", "/cart"]
+            }
+        }
 
         # 排除雜訊：網址不能包含這些特徵
         # 新增 'knowledge', 'about' 等常見非產品頁面
@@ -59,6 +72,8 @@ class SitemapParser:
     def is_likely_product(self, url):
         """網址過濾邏輯：只保留產品頁"""
         u = url.lower()
+        parsed = urlparse(u)
+        host = parsed.netloc
         
         # [New] 0. 全域清洗規則 (針對悠活原力等)
         # 排除非 ASCII (亂碼/中文路徑)
@@ -66,6 +81,16 @@ class SitemapParser:
             return False
         # 排除結尾長數字 (時間戳記/變體) e.g. -20220719115000
         if re.search(r'-\d{6,}', u):
+            return False
+
+        # [New] 0.5 網域白名單規則 (配方時代專用)
+        if host in self.domain_whitelist_rules:
+            rules = self.domain_whitelist_rules[host]
+            if any(deny in u for deny in rules["deny_patterns"]):
+                return False
+            if any(allow in u for allow in rules["allow_patterns"]):
+                return True
+            # 白名單網域但沒有明顯產品特徵時，保守不放行
             return False
 
         # 1. 排除特徵 (優先執行)
