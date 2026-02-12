@@ -73,8 +73,13 @@ class AgentD2CScanner:
             except:
                 pass
 
-        # 九五之丹頁面多數是靜態字串，不強制等待價格 selector，避免卡住
+        # 九五之丹：短等待價格區塊載入（避免太早抓到「已熱銷1000份」誤判為價格）
         if "95dan.com.tw" in (url or ""):
+            try:
+                await page.wait_for_selector("div.pro_dis_info", state="attached", timeout=5000)
+                await page.wait_for_selector("div.pro_dis_info span.price", state="attached", timeout=5000)
+            except:
+                pass
             return
 
         # 通用 fallback：短等待嘗試，不命中就直接往下（避免單頁長時間卡住）
@@ -89,6 +94,40 @@ class AgentD2CScanner:
 
     async def _extract_price_from_dom(self, page):
         """DOM 優先策略：先直接抽價格，若成功可覆蓋 LLM 價格。"""
+        current_url = (page.url or "").lower()
+
+        # 九五之丹專用：優先讀取產品價格區塊
+        # <div class="pro_dis_info"><span class="old-price">NT$400</span><span class="price">NT$350</span></div>
+        if "95dan.com.tw" in current_url:
+            try:
+                exact_price_text = await page.evaluate("""() => {
+                    const node = document.querySelector('div.pro_dis_info span.price');
+                    return node ? node.textContent : '';
+                }""")
+                exact_price = int(re.sub(r'[^\d]', '', exact_price_text or '') or 0)
+                if 100 <= exact_price <= 200000:
+                    return exact_price
+            except:
+                pass
+
+            # fallback：若 span.price 抓不到，再嘗試在 pro_dis_info 區塊中抽最後一個金額
+            try:
+                block_text = await page.evaluate("""() => {
+                    const node = document.querySelector('div.pro_dis_info');
+                    return node ? node.textContent : '';
+                }""") or ""
+                nums = re.findall(r'\d{2,6}', block_text.replace(',', ''))
+                if nums:
+                    # 通常最後一個是 sale price，前一個是 old-price
+                    v = int(nums[-1])
+                    if 100 <= v <= 200000:
+                        return v
+            except:
+                pass
+
+            # 九五之丹若未命中明確價格，直接回傳 0；交由 HTML/JSON-LD 價格來源處理
+            return 0
+
         selectors = [
             ".same-price .price",
             ".same-price .price-regular .price",
@@ -235,6 +274,25 @@ class AgentD2CScanner:
         if not html_content:
             return 0
 
+        # 0) 九五之丹 HTML 區塊直抓：
+        # <div class="pro_dis_info"><span class="old-price">NT$400</span> <span class="price">NT$350</span></div>
+        try:
+            block_match = re.search(r'<div[^>]*class="[^"]*pro_dis_info[^"]*"[^>]*>(.*?)</div>', html_content, re.IGNORECASE | re.DOTALL)
+            if block_match:
+                block = block_match.group(1)
+                sale_match = re.search(r'<span[^>]*class="[^"]*price[^"]*"[^>]*>\s*NT\$?\s*([\d,]+)', block, re.IGNORECASE)
+                if sale_match:
+                    val = int(sale_match.group(1).replace(',', ''))
+                    if val > 0:
+                        return val
+                nums = re.findall(r'NT\$?\s*([\d,]+)', block, re.IGNORECASE)
+                if nums:
+                    val = int(nums[-1].replace(',', ''))
+                    if val > 0:
+                        return val
+        except:
+            pass
+
         # 1) JSON-LD
         try:
             soup = BeautifulSoup(html_content, 'html.parser')
@@ -377,17 +435,27 @@ class AgentD2CScanner:
                             image_url = src
                             break
                 
-                # LLM 分析
-                ai_data = await self.analyze_with_llm(content, url)
+                # LLM 分析（九五之丹先走規則引擎，避免 API 延遲造成整體 timeout）
+                if "95dan.com.tw" in (url or ""):
+                    ai_data = {}
+                else:
+                    ai_data = await self.analyze_with_llm(content, url)
                 basic_data = self._extract_basic_info_from_html(content, url)
 
                 # 整合資料（LLM 成功/失敗都會組裝結果，避免 pending）
                 final_price = (ai_data or {}).get("price", 0)
-                # DOM / HTML script 優先策略：任一有值即覆蓋 LLM
-                if dom_price > 0:
-                    final_price = dom_price
-                elif html_price > 0:
-                    final_price = html_price
+                # DOM / HTML script 優先策略
+                # 九五之丹先信任 HTML/JSON-LD（避免 DOM 抓到「已熱銷1000份」）
+                if "95dan.com.tw" in (url or ""):
+                    if html_price > 0:
+                        final_price = html_price
+                    elif dom_price > 0:
+                        final_price = dom_price
+                else:
+                    if dom_price > 0:
+                        final_price = dom_price
+                    elif html_price > 0:
+                        final_price = html_price
 
                 data = {
                     "source": "D2C_Hunter", # 標記來源
