@@ -6,6 +6,7 @@ import sys
 import traceback
 from datetime import datetime
 from collections import defaultdict
+from tqdm import tqdm
 
 import pandas as pd
 
@@ -22,9 +23,15 @@ OUTPUT_CSV = "data/d2c_full_database.csv"
 ERROR_LOG = "data/batch_scanner_error.log"
 
 TOP_N_BRANDS = 10
-MAX_URLS_PER_BRAND = 30
+MAX_URLS_PER_BRAND = int(os.environ.get("MAX_URLS_PER_BRAND", "30"))
 MAX_RETRIES = 3
 CONCURRENCY = 3
+TARGET_BRANDS = {
+    b.strip() for b in os.environ.get("BATCH_TARGET_BRANDS", "").split(",") if b.strip()
+}
+FALLBACK_URLS = [
+    u.strip() for u in os.environ.get("BATCH_FALLBACK_URLS", "").split(",") if u.strip()
+]
 
 # --- 品牌驗收門檻與任務機制設定 ---
 # 目標：當品牌抓取數顯著低於預期時，自動建立「找問題/解問題」任務清單
@@ -60,6 +67,8 @@ def load_top_domains(path, top_n=10):
         for row in reader:
             brand = (row.get("brand") or "").strip()
             domain = (row.get("domain") or "").strip()
+            if TARGET_BRANDS and brand not in TARGET_BRANDS:
+                continue
             if brand and domain:
                 domains.append((brand, domain))
     return domains[:top_n]
@@ -286,6 +295,15 @@ async def main():
     pending = [{"url": u, "brand": b} for u, b in dedup_map.items()]
 
     if not pending:
+        if FALLBACK_URLS:
+            fallback_brand = next(iter(TARGET_BRANDS), "FallbackBrand")
+            pending = [{"url": u, "brand": fallback_brand} for u in FALLBACK_URLS]
+            print(f"⚠️ 使用 fallback URL 進行小規模測試: {len(pending)} 筆")
+        else:
+            print("⚠️ 本次沒有可掃描的產品 URL")
+            return
+
+    if not pending:
         print("⚠️ 本次沒有可掃描的產品 URL")
         return
 
@@ -304,7 +322,9 @@ async def main():
                 b = (res.get("brand") or item["brand"] or "Unknown").strip()
                 success_metrics[b] += 1
 
-    await asyncio.gather(*[_job(it) for it in pending])
+    tasks = [asyncio.create_task(_job(it)) for it in pending]
+    for job in tqdm(asyncio.as_completed(tasks), total=len(tasks), desc="Scanning URLs", unit="url"):
+        await job
 
     # 3) 輸出
     save_to_csv(scanned_results, OUTPUT_CSV)
