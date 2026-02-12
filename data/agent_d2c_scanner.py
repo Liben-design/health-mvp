@@ -264,6 +264,46 @@ class AgentD2CScanner:
 
         return {"brand": brand, "title": title}
 
+    def _extract_95dan_highlights_and_count(self, html_content):
+        """九五之丹頁面專用：提取商品特色與單包裝數量（粒/包）。"""
+        highlights = ""
+        total_count = 0
+
+        if not html_content:
+            return {"product_highlights": highlights, "total_count": total_count}
+
+        try:
+            soup = BeautifulSoup(html_content, 'html.parser')
+
+            # 商品特色：.pro_info_div 中 title 為「商品特色」的 ul/li
+            for block in soup.select("div.pro_info_div"):
+                title_node = block.select_one("div.pro_info_title")
+                title_text = title_node.get_text(strip=True) if title_node else ""
+
+                if "商品特色" in title_text:
+                    items = [li.get_text(" ", strip=True) for li in block.select("ul.pro_info_ul li")]
+                    items = [x for x in items if x]
+                    if items:
+                        highlights = ";".join(items)
+
+                if "商品資訊" in title_text:
+                    info_text = block.get_text(" ", strip=True)
+                    # 例：規格：30粒/包，15天份
+                    m = re.search(r"規格\s*[:：]\s*(\d+)\s*(?:粒|顆|錠|包)\s*/\s*包", info_text)
+                    if m:
+                        total_count = int(m.group(1))
+
+            # fallback：若商品資訊區塊沒抓到，嘗試全頁規格文字
+            if total_count == 0:
+                full_text = soup.get_text(" ", strip=True)
+                m = re.search(r"規格\s*[:：]\s*(\d+)\s*(?:粒|顆|錠|包)\s*/\s*包", full_text)
+                if m:
+                    total_count = int(m.group(1))
+        except:
+            pass
+
+        return {"product_highlights": highlights, "total_count": total_count}
+
     def _extract_price_from_html_content(self, html_content):
         """
         第二輪價格策略：直接從 HTML / script 資料層提取價格。
@@ -441,6 +481,7 @@ class AgentD2CScanner:
                 else:
                     ai_data = await self.analyze_with_llm(content, url)
                 basic_data = self._extract_basic_info_from_html(content, url)
+                d95_meta = self._extract_95dan_highlights_and_count(content) if "95dan.com.tw" in (url or "") else {}
 
                 # 整合資料（LLM 成功/失敗都會組裝結果，避免 pending）
                 final_price = (ai_data or {}).get("price", 0)
@@ -463,10 +504,10 @@ class AgentD2CScanner:
                     "title": (ai_data or {}).get("title") or basic_data.get("title", "Unknown"),
                     "price": int(final_price or 0),
                     "unit_price": (ai_data or {}).get("unit_price", 0),
-                    "total_count": (ai_data or {}).get("total_count", 0),
+                    "total_count": (ai_data or {}).get("total_count", 0) or d95_meta.get("total_count", 0),
                     "url": url,
                     "image_url": image_url or "",
-                    "product_highlights": (ai_data or {}).get("product_highlights", "")
+                    "product_highlights": (ai_data or {}).get("product_highlights", "") or d95_meta.get("product_highlights", "")
                 }
                 print(f"✅ [Agent] 成功提取: {data['title']} (${data['price']})")
                 

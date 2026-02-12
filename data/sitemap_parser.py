@@ -31,7 +31,9 @@ class SitemapParser:
         self.domain_whitelist_rules = {
             "www.95dan.com.tw": {
                 "allow_patterns": [
+                    "/alcohol-enzyme",
                     "/maca",
+                    "/macaplus",
                     "/lutein",
                     "/b+zinc",
                     "/b+fe",
@@ -41,13 +43,18 @@ class SitemapParser:
                     "/curcumin",
                     "/fishoil",
                     "/calcium",
+                    "/calciumplus",
                     "/collagen",
                     "/vitaminc",
+                    "/vitamine",
                     "/probiotics",
+                    "/fiberplus",
                     "/cranberry",
                     "/dmannose",
                     "/gsh-enzyme",
                     "/gaba-enzyme",
+                    "/simply-enzyme",
+                    "/superhca",
                     "/tryptophan",
                     "/polypeptide-p",
                     "/pct2",
@@ -56,6 +63,7 @@ class SitemapParser:
                 ],
                 "deny_patterns": [
                     "/allproduct",
+                    "/home",
                     "/about",
                     "/aboutus",
                     "/news",
@@ -293,6 +301,14 @@ class SitemapParser:
                     full_url = urljoin(domain, href)
                     if self.is_likely_product(full_url):
                         found_urls.add(full_url)
+
+            # 95dan 補強：有些產品卡片由前端渲染，直接以白名單 slug 合成 URL 補齊
+            rule = self.domain_whitelist_rules.get("www.95dan.com.tw", {})
+            for token in rule.get("allow_patterns", []):
+                if token.startswith("/"):
+                    candidate = urljoin(domain, token)
+                    if self.is_likely_product(candidate):
+                        found_urls.add(candidate)
 
         filter_rate = (1 - len(found_urls) / total_scanned) * 100 if total_scanned > 0 else 0
         print(f"✅ [Sitemap] {brand} 完成，掃描 {total_scanned} 連結 -> 提取 {len(found_urls)} 產品 (過濾率 {filter_rate:.1f}%)")

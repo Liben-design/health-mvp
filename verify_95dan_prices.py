@@ -10,8 +10,15 @@ def main():
     if len(sub) == 0:
         return
 
-    cols = [c for c in ["brand", "title", "price", "url"] if c in sub.columns]
+    cols = [c for c in ["brand", "title", "price", "total_count", "url"] if c in sub.columns]
     print(sub[cols].to_string(index=False))
+
+    if "product_highlights" in sub.columns:
+        with_highlights = sub["product_highlights"].fillna("").astype(str).str.strip().ne("").sum()
+        print(f"[with product_highlights] {with_highlights}/{len(sub)}")
+    if "total_count" in sub.columns:
+        with_count = pd.to_numeric(sub["total_count"], errors="coerce").fillna(0).gt(0).sum()
+        print(f"[with total_count>0] {with_count}/{len(sub)}")
 
     out_path = "data/95dan_products_full.csv"
     sub.to_csv(out_path, index=False, encoding="utf-8-sig")
