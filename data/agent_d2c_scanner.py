@@ -5,10 +5,18 @@ import random
 import re
 import html as html_lib
 from bs4 import BeautifulSoup
-from playwright.async_api import async_playwright
+from playwright.async_api import async_playwright, TimeoutError as PlaywrightTimeoutError
 from playwright_stealth import stealth_async
-import google.generativeai as genai
-from dotenv import load_dotenv
+try:
+    import google.generativeai as genai
+except ImportError:
+    genai = None
+
+try:
+    from dotenv import load_dotenv
+except ImportError:
+    def load_dotenv(*args, **kwargs):
+        return False
 
 # 載入環境變數
 script_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) # 回到專案根目錄
@@ -22,8 +30,12 @@ class AgentD2CScanner:
     def __init__(self):
         self.api_key = os.environ.get("GOOGLE_API_KEY")
         self.llm_timeout_seconds = int(os.environ.get("D2C_LLM_TIMEOUT", "15"))
-        if not self.api_key:
-            print("⚠️ [Agent] 未設定 GOOGLE_API_KEY，AI 分析將失效。")
+        self.page_timeout_seconds = 30
+        if not self.api_key or genai is None:
+            if genai is None:
+                print("⚠️ [Agent] 未安裝 google-generativeai，AI 分析將失效。")
+            else:
+                print("⚠️ [Agent] 未設定 GOOGLE_API_KEY，AI 分析將失效。")
         else:
             genai.configure(api_key=self.api_key)
             self.model = genai.GenerativeModel('gemini-2.0-flash', generation_config={"response_mime_type": "application/json"})
@@ -56,7 +68,7 @@ class AgentD2CScanner:
         if "vitabox" in url or "shopline" in url:
             prioritized = ".same-price .price, .price-regular .price, .js-price .price, .product-price, .price"
             try:
-                await page.wait_for_selector(prioritized, state="visible", timeout=10000)
+                await page.wait_for_selector(prioritized, state="visible", timeout=30000)
                 return
             except:
                 pass
@@ -64,7 +76,7 @@ class AgentD2CScanner:
         # 通用 fallback：逐一等待，多一層保險
         for selector in selector_candidates:
             try:
-                await page.wait_for_selector(selector, state="attached", timeout=3500)
+                await page.wait_for_selector(selector, state="attached", timeout=30000)
                 return
             except:
                 continue
@@ -130,7 +142,8 @@ class AgentD2CScanner:
 
     async def analyze_with_llm(self, html_content, url):
         """呼叫 Gemini 進行語義分析"""
-        if not self.api_key: return {}
+        if not self.api_key or genai is None:
+            return {}
 
         soup = BeautifulSoup(html_content, 'html.parser')
         # 移除雜訊
@@ -284,6 +297,7 @@ class AgentD2CScanner:
         if not url:
             print("❌ [Agent] 無效 URL，跳過")
             return None
+        print(f"[INFO] Start scraping: {url}...")
         print(f"🤖 [Agent] 正在掃描: {url}")
         data = None
         
@@ -294,9 +308,12 @@ class AgentD2CScanner:
                 user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
             )
             page = await context.new_page()
+            page.set_default_timeout(30000)
+            page.set_default_navigation_timeout(30000)
             await stealth_async(page)
 
-            try:
+            async def _run_page_work():
+                nonlocal data
                 # 隨機延遲，模擬真人
                 await asyncio.sleep(random.uniform(1, 3))
                 
@@ -306,7 +323,7 @@ class AgentD2CScanner:
                 if response.status in [403, 429]:
                     print(f"⚠️ [Agent] 遇到 {response.status}，等待 10 秒後重試...")
                     await asyncio.sleep(10)
-                    await page.reload()
+                    await page.reload(wait_until="domcontentloaded", timeout=30000)
                 
                 # 等待價格元素渲染 (在 dump HTML 前執行)
                 await self._wait_for_price_elements(page, url)
@@ -379,6 +396,11 @@ class AgentD2CScanner:
                 }
                 print(f"✅ [Agent] 成功提取: {data['title']} (${data['price']})")
                 
+            try:
+                await asyncio.wait_for(_run_page_work(), timeout=self.page_timeout_seconds)
+            except (PlaywrightTimeoutError, asyncio.TimeoutError):
+                print(f"[WARN] Timeout skipping: {url}")
+                return None
             except Exception as e:
                 print(f"❌ [Agent] 掃描失敗 {url}: {e}")
             finally:

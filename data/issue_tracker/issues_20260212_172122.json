@@ -1,0 +1,117 @@
+{
+  "generated_at": "2026-02-12T17:21:22.628502",
+  "parse_metrics": {
+    "大研生醫": {
+      "domain": "https://www.daikenshop.com/",
+      "parsed_urls": 66,
+      "capped_urls": 30,
+      "url_cap": 30
+    },
+    "營養師輕食": {
+      "domain": "https://www.dietician.com.tw/",
+      "parsed_urls": 16,
+      "capped_urls": 16,
+      "url_cap": 30
+    },
+    "vitabox": {
+      "domain": "https://shop.vitabox.com.tw/",
+      "parsed_urls": 30,
+      "capped_urls": 30,
+      "url_cap": 30
+    },
+    "配方時代": {
+      "domain": "https://healthformula.com.tw/",
+      "parsed_urls": 53,
+      "capped_urls": 30,
+      "url_cap": 30
+    },
+    "悠活原力": {
+      "domain": "https://www.yohopower.tw/",
+      "parsed_urls": 96,
+      "capped_urls": 80,
+      "url_cap": 80
+    },
+    "九五之丹": {
+      "domain": "https://www.95dan.com.tw/",
+      "parsed_urls": 0,
+      "capped_urls": 0,
+      "url_cap": 30
+    },
+    "達摩本草": {
+      "domain": "https://www.damokampo.com/",
+      "parsed_urls": 105,
+      "capped_urls": 30,
+      "url_cap": 30
+    },
+    "寶齡富錦": {
+      "domain": "https://www.pbfbio.com.tw",
+      "parsed_urls": 0,
+      "capped_urls": 0,
+      "url_cap": 30
+    },
+    "火星生技": {
+      "domain": "https://www.taizaku.shop",
+      "parsed_urls": 148,
+      "capped_urls": 30,
+      "url_cap": 30
+    },
+    "大醫生技": {
+      "domain": "https://www.greencome.com.tw/",
+      "parsed_urls": 0,
+      "capped_urls": 0,
+      "url_cap": 30
+    }
+  },
+  "success_metrics": {
+    "大研生醫": 30,
+    "營養師輕食": 14,
+    "VITABOX®": 25,
+    "VITABOX": 5,
+    "配方時代": 8,
+    "悠活原力YohoPower": 67,
+    "悠活原力": 13,
+    "達摩本草": 30,
+    "TAIZAKU": 16,
+    "火星生技": 9,
+    "GREENX": 3,
+    "武倍": 1,
+    "斬宿薑皇": 1
+  },
+  "issues": [
+    {
+      "severity": "P1",
+      "brand": "vitabox",
+      "stage": "extraction_quality",
+      "problem": "URL→有效資料轉換率偏低 (0/30, 0.0%)",
+      "action": "抽樣檢查失敗 URL，區分『頁面不可達 / selector 失效 / LLM 解析失敗』後定向修復"
+    },
+    {
+      "severity": "P1",
+      "brand": "配方時代",
+      "stage": "extraction_quality",
+      "problem": "URL→有效資料轉換率偏低 (8/30, 26.7%)",
+      "action": "抽樣檢查失敗 URL，區分『頁面不可達 / selector 失效 / LLM 解析失敗』後定向修復"
+    },
+    {
+      "severity": "P0",
+      "brand": "悠活原力",
+      "stage": "extraction",
+      "problem": "最終僅成功抓取 13 筆，低於目標 50",
+      "action": "逐步比對 target URLs 與 scan 失敗原因，補強 selector / 重試 / 反爬處理"
+    },
+    {
+      "severity": "P1",
+      "brand": "悠活原力",
+      "stage": "extraction_quality",
+      "problem": "URL→有效資料轉換率偏低 (13/80, 16.2%)",
+      "action": "抽樣檢查失敗 URL，區分『頁面不可達 / selector 失效 / LLM 解析失敗』後定向修復"
+    },
+    {
+      "severity": "P1",
+      "brand": "火星生技",
+      "stage": "extraction_quality",
+      "problem": "URL→有效資料轉換率偏低 (9/30, 30.0%)",
+      "action": "抽樣檢查失敗 URL，區分『頁面不可達 / selector 失效 / LLM 解析失敗』後定向修復"
+    }
+  ]
+}
