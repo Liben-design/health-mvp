@@ -73,11 +73,17 @@ class AgentD2CScanner:
             except:
                 pass
 
-        # 通用 fallback：逐一等待，多一層保險
+        # 九五之丹頁面多數是靜態字串，不強制等待價格 selector，避免卡住
+        if "95dan.com.tw" in (url or ""):
+            return
+
+        # 通用 fallback：短等待嘗試，不命中就直接往下（避免單頁長時間卡住）
         for selector in selector_candidates:
             try:
-                await page.wait_for_selector(selector, state="attached", timeout=30000)
+                await page.wait_for_selector(selector, state="attached", timeout=1500)
                 return
+            except PlaywrightTimeoutError:
+                continue
             except:
                 continue
 
