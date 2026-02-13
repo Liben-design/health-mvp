@@ -153,6 +153,92 @@ class SitemapParser:
                     "/pages"
                 ],
                 "allow_short_slug": True
+            },
+            "healthformula.com.tw": {
+                "allow_patterns": [
+                    "/products/",
+                    "/product/",
+                    "/shop/",
+                    "lutein",
+                    "fish-oil",
+                    "probiotic",
+                    "omega",
+                    "collagen",
+                    "calcium",
+                    "magnesium",
+                    "vitamin",
+                    "b-complex",
+                    "zinc",
+                    "iron"
+                ],
+                "deny_patterns": [
+                    "/blog",
+                    "/news",
+                    "/article",
+                    "/allproduct",
+                    "/certifications",
+                    "/materials",
+                    "/editorial-policy",
+                    "/newfriend",
+                    "/affordable",
+                    "/renee",
+                    "/nutritionist",
+                    "-safety-and-patent",
+                    "-result",
+                    "/about",
+                    "/contact",
+                    "/faq",
+                    "/policy",
+                    "/member",
+                    "/cart",
+                    "/account",
+                    "/terms",
+                    "/privacy"
+                ],
+                "allow_short_slug": True
+            },
+            "www.healthformula.com.tw": {
+                "allow_patterns": [
+                    "/products/",
+                    "/product/",
+                    "/shop/",
+                    "lutein",
+                    "fish-oil",
+                    "probiotic",
+                    "omega",
+                    "collagen",
+                    "calcium",
+                    "magnesium",
+                    "vitamin",
+                    "b-complex",
+                    "zinc",
+                    "iron"
+                ],
+                "deny_patterns": [
+                    "/blog",
+                    "/news",
+                    "/article",
+                    "/allproduct",
+                    "/certifications",
+                    "/materials",
+                    "/editorial-policy",
+                    "/newfriend",
+                    "/affordable",
+                    "/renee",
+                    "/nutritionist",
+                    "-safety-and-patent",
+                    "-result",
+                    "/about",
+                    "/contact",
+                    "/faq",
+                    "/policy",
+                    "/member",
+                    "/cart",
+                    "/account",
+                    "/terms",
+                    "/privacy"
+                ],
+                "allow_short_slug": True
             }
         }
 
