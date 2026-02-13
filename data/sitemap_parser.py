@@ -450,9 +450,10 @@ def main():
             if row.get("domain") and row.get("brand"):
                 domains.append((row["brand"], row["domain"]))
 
-    # [測試模式] 僅處理前 5 個品牌進行校準
-    print(f"⚠️ 測試模式啟動：僅處理清單中的前 5 個品牌 (共 {len(domains)} 個)")
-    domains = domains[:5]
+    # [測試模式] 預設放寬到前 500 個品牌，避免過度截斷
+    test_top_n = int(os.environ.get("SITEMAP_TEST_TOP_N", "500"))
+    print(f"⚠️ 測試模式啟動：處理清單中的前 {test_top_n} 個品牌 (共 {len(domains)} 個)")
+    domains = domains[:test_top_n]
 
     # 平行處理 (加速)
     print(f"🚀 啟動 Sitemap 解析器，共 {len(domains)} 個目標...")
