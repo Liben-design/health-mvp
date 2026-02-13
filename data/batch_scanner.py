@@ -116,6 +116,30 @@ def save_to_csv(data, filepath):
     print(f"💾 已更新存檔: {filepath} (共 {len(df_all)} 筆)")
 
 
+def enforce_required_product_fields(records):
+    """強制每筆資料都有既定產品欄位，避免後續分析出現缺欄。"""
+    required = {
+        "title": "",
+        "price": 0,
+        "unit_price": 0,
+        "total_count": 0,
+        "url": "",
+        "image_url": "",
+        "product_highlights": "",
+    }
+
+    normalized = []
+    for row in records or []:
+        item = dict(row or {})
+        for key, default_val in required.items():
+            val = item.get(key, default_val)
+            if val is None:
+                val = default_val
+            item[key] = val
+        normalized.append(item)
+    return normalized
+
+
 def build_issue_tasks(parse_metrics, success_metrics):
     """根據品牌解析/掃描結果，建立可執行任務清單。"""
     issues = []
@@ -326,7 +350,8 @@ async def main():
     for job in tqdm(asyncio.as_completed(tasks), total=len(tasks), desc="Scanning URLs", unit="url"):
         await job
 
-    # 3) 輸出
+    # 3) 輸出（先做欄位強制補齊）
+    scanned_results = enforce_required_product_fields(scanned_results)
     save_to_csv(scanned_results, OUTPUT_CSV)
 
     # 4) 問題追蹤與解題任務清單

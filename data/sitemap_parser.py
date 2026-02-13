@@ -29,6 +29,60 @@ class SitemapParser:
         # 配方時代 (formula-time) 產品 URL 結構可能不固定，且有時不含 /product/
         # 允許短路徑 slug (e.g. /lutein-ex)，但仍排除常見內容頁
         self.domain_whitelist_rules = {
+            "www.95dan.com.tw": {
+                "allow_patterns": [
+                    "/alcohol-enzyme",
+                    "/maca",
+                    "/macaplus",
+                    "/lutein",
+                    "/b+zinc",
+                    "/b+fe",
+                    "/arginine",
+                    "/pumpkin",
+                    "/withania",
+                    "/curcumin",
+                    "/fishoil",
+                    "/calcium",
+                    "/calciumplus",
+                    "/collagen",
+                    "/vitaminc",
+                    "/vitamine",
+                    "/probiotics",
+                    "/fiberplus",
+                    "/cranberry",
+                    "/dmannose",
+                    "/gsh-enzyme",
+                    "/gaba-enzyme",
+                    "/simply-enzyme",
+                    "/superhca",
+                    "/tryptophan",
+                    "/polypeptide-p",
+                    "/pct2",
+                    "/biotin",
+                    "/msm"
+                ],
+                "deny_patterns": [
+                    "/allproduct",
+                    "/home",
+                    "/about",
+                    "/aboutus",
+                    "/news",
+                    "/blog",
+                    "/media",
+                    "/kol",
+                    "/corporate",
+                    "/shippingpolicy",
+                    "/refund",
+                    "/signin",
+                    "/sgs",
+                    "/shopee",
+                    "/terms",
+                    "/policy",
+                    "/privacy",
+                    "/contact"
+                ],
+                "allow_short_slug": False
+            },
             "www.formula-time.com": {
                 "allow_patterns": [
                     "/products/",
@@ -236,6 +290,25 @@ class SitemapParser:
                     total_scanned += 1
                     if self.is_likely_product(url):
                         found_urls.add(url)
+
+        # 九五之丹補強：從產品總覽頁補抓產品詳情連結（固定執行），避免 sitemap 欄位不足
+        if "95dan.com.tw" in domain:
+            all_product_page = urljoin(domain, "/allproduct")
+            html = self.fetch_content(all_product_page)
+            if html:
+                hrefs = re.findall(r'href=["\']([^"\']+)["\']', html)
+                for href in hrefs:
+                    full_url = urljoin(domain, href)
+                    if self.is_likely_product(full_url):
+                        found_urls.add(full_url)
+
+            # 95dan 補強：有些產品卡片由前端渲染，直接以白名單 slug 合成 URL 補齊
+            rule = self.domain_whitelist_rules.get("www.95dan.com.tw", {})
+            for token in rule.get("allow_patterns", []):
+                if token.startswith("/"):
+                    candidate = urljoin(domain, token)
+                    if self.is_likely_product(candidate):
+                        found_urls.add(candidate)
 
         filter_rate = (1 - len(found_urls) / total_scanned) * 100 if total_scanned > 0 else 0
         print(f"✅ [Sitemap] {brand} 完成，掃描 {total_scanned} 連結 -> 提取 {len(found_urls)} 產品 (過濾率 {filter_rate:.1f}%)")
