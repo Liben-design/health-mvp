@@ -238,8 +238,8 @@ async def scan_url_with_retry(scanner, brand, url, max_retries=3):
         try:
             result = await scanner.scan_url(url)
             if result:
-                if not result.get("brand") or result.get("brand") == "Unknown":
-                    result["brand"] = brand
+                # 品牌歸屬以目標域名清單為主，避免 LLM/頁面文案造成品牌別名分裂
+                result["brand"] = brand
                 return result
             return None
         except Exception as e:

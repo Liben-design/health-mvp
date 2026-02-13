@@ -4,6 +4,7 @@ import csv
 import json
 import os
 import re
+import gzip
 from urllib.parse import urljoin, urlparse
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
@@ -160,11 +161,36 @@ class SitemapParser:
         self.exclude_patterns = ['/blog', '/news', '/article', '/page', '/about', '/contact', '/faq', '/terms', 
                                  '/collections/', '/category/', '/tag/', '/knowledge/', '/media/', '/policy/', '/account/', '/cart/', '/member/']
 
+    @staticmethod
+    def _is_greencome_product_url(url):
+        """大醫生技專用：僅保留主產品頁，排除 certifications 附頁。"""
+        u = (url or "").lower()
+        if "greencome.com.tw/products/" not in u:
+            return False
+        if "/certifications" in u:
+            return False
+        return True
+
     def fetch_content(self, url):
         """輕量化抓取內容，含超時控制"""
         try:
             response = self.session.get(url, timeout=10)
             if response.status_code == 200:
+                data = response.content or b""
+
+                # 支援 .gz sitemap（部分站台 robots 只提供 gzip 版本）
+                is_gzip = (
+                    url.lower().endswith('.gz')
+                    or response.headers.get('content-type', '').lower().find('gzip') >= 0
+                    or data[:2] == b'\x1f\x8b'
+                )
+                if is_gzip:
+                    try:
+                        return gzip.decompress(data).decode('utf-8', errors='ignore')
+                    except Exception:
+                        # 若解壓失敗，退回 requests 文字解碼
+                        return response.text
+
                 return response.text
         except Exception as e:
             # 靜默失敗，僅在 debug 時輸出
@@ -309,6 +335,10 @@ class SitemapParser:
                     candidate = urljoin(domain, token)
                     if self.is_likely_product(candidate):
                         found_urls.add(candidate)
+
+        # 大醫生技補強：排除 /certifications 等非主產品頁，避免噪音 URL 進入掃描
+        if "greencome.com.tw" in domain:
+            found_urls = {u for u in found_urls if self._is_greencome_product_url(u)}
 
         filter_rate = (1 - len(found_urls) / total_scanned) * 100 if total_scanned > 0 else 0
         print(f"✅ [Sitemap] {brand} 完成，掃描 {total_scanned} 連結 -> 提取 {len(found_urls)} 產品 (過濾率 {filter_rate:.1f}%)")
