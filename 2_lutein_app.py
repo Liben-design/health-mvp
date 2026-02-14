@@ -37,6 +37,26 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+st.markdown("""
+<style>
+    .chip-wrap {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 6px;
+    }
+    .chip {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 999px;
+        background: #eef6ff;
+        color: #1f4e79;
+        font-size: 0.78rem;
+        border: 1px solid #d6e7ff;
+    }
+</style>
+""", unsafe_allow_html=True)
+
 # 讀取資料（優化：兼容多個關鍵字的 CSV 檔案合併讀取，減少重複代碼並支援擴展）
 @st.cache_data
 def calculate_specs_from_title(title, price):
@@ -171,6 +191,27 @@ if df is None:
 # 產品類別選擇器（基於合併資料）
 selected_category = st.sidebar.selectbox("產品類別", ["全部"] + sorted(df['category'].unique().tolist()))
 
+# 全局搜尋列（記住搜尋狀態）
+if 'global_search' not in st.session_state:
+    st.session_state['global_search'] = ""
+
+st.sidebar.text_input(
+    "🔍 搜尋品牌、產品或成分...",
+    key="global_search",
+    placeholder="例如：魚油 / 益生菌 / 游離型 / FloraGLO"
+)
+
+st.sidebar.markdown("**🔥 熱門關鍵字**")
+hot_keywords = ["魚油", "益生菌", "葉黃素", "瑪卡", "游離型", "專利"]
+hot_cols = st.sidebar.columns(3)
+for i, hot_kw in enumerate(hot_keywords):
+    if hot_cols[i % 3].button(hot_kw, key=f"hot_kw_{hot_kw}"):
+        st.session_state['global_search'] = hot_kw
+        if hasattr(st, "rerun"):
+            st.rerun()
+        else:
+            st.experimental_rerun()
+
 # ==========================================
 # Header & 數據概況
 # ==========================================
@@ -193,7 +234,6 @@ with col4:
 
 st.divider()
 
-keyword = st.sidebar.text_input("搜尋產品名稱或品牌")
 sources = st.sidebar.multiselect("來源平台", df['source'].unique(), default=df['source'].unique())
 
 # 新增：品牌篩選
@@ -216,8 +256,14 @@ result = df[df['source'].isin(sources)]
 if selected_category != "全部":
     result = result[result['category'] == selected_category]
 
-if keyword:
-    result = result[result['title'].str.contains(keyword, case=False) | result['brand'].str.contains(keyword, case=False)]
+global_keyword = (st.session_state.get('global_search') or "").strip()
+if global_keyword:
+    cross_mask = (
+        result['brand'].str.contains(global_keyword, case=False, na=False)
+        | result['title'].str.contains(global_keyword, case=False, na=False)
+        | result['product_highlights'].str.contains(global_keyword, case=False, na=False)
+    )
+    result = result[cross_mask]
 
 if selected_brand != "全部":
     result = result[result['brand'] == selected_brand]
@@ -287,7 +333,8 @@ else:
                 # 顯示標籤膠囊
                 highlights = [t.strip() for t in str(row['product_highlights']).split(";") if t.strip()]
                 if highlights:
-                    st.markdown(" ".join([f"`{t}`" for t in highlights]))
+                    chips_html = "".join([f"<span class='chip'>{t}</span>" for t in highlights[:8]])
+                    st.markdown(f"<div class='chip-wrap'>{chips_html}</div>", unsafe_allow_html=True)
 
                 # 顯示 AI 分析亮點
                 if row['product_highlights']:
