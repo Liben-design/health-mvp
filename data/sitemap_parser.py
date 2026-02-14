@@ -246,6 +246,10 @@ class SitemapParser:
         # 新增 'knowledge', 'about' 等常見非產品頁面
         self.exclude_patterns = ['/blog', '/news', '/article', '/page', '/about', '/contact', '/faq', '/terms', 
                                  '/collections/', '/category/', '/tag/', '/knowledge/', '/media/', '/policy/', '/account/', '/cart/', '/member/']
+        # 排除非核心語系/區域站路徑，避免掃到海外變體導致 URL 爆量
+        self.locale_exclude_paths = ['/en/', '/my/', '/sg/', '/macau/', '/hk/']
+        # 排除明顯非保健食品分類（若站台有此類路徑）
+        self.non_supplement_paths = ['/makeup/', '/skincare/']
 
     @staticmethod
     def _is_greencome_product_url(url):
@@ -303,6 +307,14 @@ class SitemapParser:
         u = url.lower()
         parsed = urlparse(u)
         host = parsed.netloc
+
+        # 0) 語系/區域站黑名單（先砍掉高噪音來源）
+        if any(x in u for x in self.locale_exclude_paths):
+            return False
+
+        # 0.1) 明顯非保健分類黑名單
+        if any(x in u for x in self.non_supplement_paths):
+            return False
         
         # [New] 0. 全域清洗規則 (針對悠活原力等)
         # 排除非 ASCII (亂碼/中文路徑)

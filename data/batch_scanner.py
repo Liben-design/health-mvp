@@ -23,7 +23,7 @@ OUTPUT_CSV = "data/d2c_full_database.csv"
 ERROR_LOG = "data/batch_scanner_error.log"
 
 TOP_N_BRANDS = 10
-MAX_URLS_PER_BRAND = int(os.environ.get("MAX_URLS_PER_BRAND", "500"))
+MAX_URLS_PER_BRAND = int(os.environ.get("MAX_URLS_PER_BRAND", "100"))
 MAX_RETRIES = 3
 CONCURRENCY = 3
 TARGET_BRANDS = {
@@ -41,7 +41,7 @@ EXPECTED_MIN_PRODUCTS = {
 
 # 若某品牌產品數預期較高，可放寬該品牌 URL 掃描上限
 BRAND_URL_CAPS = {
-    "悠活原力": 500,
+    "悠活原力": 100,
 }
 
 ISSUE_TRACKER_DIR = "data/issue_tracker"
