@@ -40,6 +40,12 @@ class AgentD2CScanner:
             genai.configure(api_key=self.api_key)
             self.model = genai.GenerativeModel('gemini-2.0-flash', generation_config={"response_mime_type": "application/json"})
 
+        # 行銷話術黑名單：最後一道清洗，避免 product_highlights 污染
+        self.marketing_noise_pattern = re.compile(
+            r"超強|極致|有感|權威推薦|冠軍|爆紅|熱銷|No\.1|第一|地表最強|神級|必買|回購",
+            re.IGNORECASE,
+        )
+
     @staticmethod
     def _normalize_url(url):
         """容錯處理：支援純網址與 Markdown 格式 `[url](url)`。"""
@@ -198,20 +204,34 @@ class AgentD2CScanner:
         text = soup.get_text(separator='\n', strip=True)[:15000] # 限制長度
 
         prompt = f"""
-        你是一個專業的電商數據爬蟲。請分析以下產品頁面的 HTML 文字內容，並提取結構化資料。
-        
-        產品網址: {url}
-        網頁內容:
-        {text}
+你是一個嚴格的保健品稽核員。你的任務是從 HTML 中萃取客觀產品資訊。
 
-        請輸出 JSON 格式，包含以下欄位 (若找不到請填 null 或 0):
-        - brand: 品牌名稱 (字串)
-        - title: 產品完整名稱 (字串)
-        - price: 目前售價 (整數，去除幣別符號)
-        - unit_price: 平均單價 (浮點數，若無法計算填 0)
-        - total_count: 總顆數/包數 (整數，若無法判斷填 0)
-        - product_highlights: 產品亮點 (字串，以分號分隔，提取專利、認證、成分優勢等)
-        """
+⚠️ 絕對禁止：忽略所有行銷形容詞與情緒用語 (如：超強、極致、有感、權威推薦、冠軍)。
+
+✅ 只允許提取以下 5 種類別的客觀數據：
+1) 專利成分（例：FloraGLO 葉黃素、MenaQ7）
+2) 成分劑量（例：EPA 80%、游離型葉黃素 20mg、100億菌）
+3) 檢驗認證（例：SGS 重金屬未檢出、IFOS 五星）
+4) 國際獎項（例：Monde Selection 金獎、SNQ）
+5) 客觀功效與型態（例：游離型、rTG、晶亮配方、排便順暢）
+
+產品網址: {url}
+網頁內容:
+{text}
+
+輸出格式要求：
+- 請輸出 JSON 物件，包含以下欄位（找不到時填 null 或 0）：
+  - brand: 字串
+  - title: 字串
+  - price: 整數
+  - unit_price: 浮點數
+  - total_count: 整數
+  - product_highlights: JSON 陣列（List of strings）
+
+嚴格規範：
+- product_highlights 只能放客觀事實短語，禁止廣告口號。
+- 不可輸出解釋文字，不可輸出 Markdown，只輸出 JSON。
+"""
 
         try:
             response = await asyncio.wait_for(
@@ -231,6 +251,28 @@ class AgentD2CScanner:
             # 容錯：若 AI 回傳 List，取第一筆
             if isinstance(data, list):
                 data = data[0] if data else {}
+
+            # 對齊 Schema：LLM 要回傳 JSON list，Python 端統一轉成分號字串
+            highlights = data.get("product_highlights", []) if isinstance(data, dict) else []
+            if isinstance(highlights, list):
+                cleaned = []
+                for h in highlights:
+                    s = str(h or "").strip()
+                    if s:
+                        if self.marketing_noise_pattern.search(s):
+                            continue
+                        cleaned.append(s)
+                # 去重保序
+                cleaned = list(dict.fromkeys(cleaned))
+                data["product_highlights"] = ";".join(cleaned)
+            elif isinstance(highlights, str):
+                # 容錯：若模型意外回字串，保留並清理分隔符
+                chunks = [x.strip() for x in re.split(r'[;；\n]+', highlights) if x.strip()]
+                chunks = [x for x in chunks if not self.marketing_noise_pattern.search(x)]
+                chunks = list(dict.fromkeys(chunks))
+                data["product_highlights"] = ";".join(chunks)
+            else:
+                data["product_highlights"] = ""
                 
             return data
         except asyncio.TimeoutError:
