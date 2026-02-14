@@ -7,3 +7,11 @@ __pycache__/
 
 # 系統檔案 (Mac)
 .DS_Store
+
+# Debug / 測試產物
+debug_*.py
+debug_*.csv
+debug_*.html
+debug_*.png
+check_*.py
+test_*.py

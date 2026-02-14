@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import os
-import glob
 import re
 
 st.set_page_config(page_title="VITAGUIDE 維他評選指南 | 最懂你的保健品顧問", page_icon="🧭", layout="wide")
@@ -90,10 +89,18 @@ def get_category_from_title(title):
     return '其他'
 
 def load_data(keywords=["葉黃素", "益生菌", "魚油"]):
-    all_files = glob.glob("data/*.csv")
+    # 僅讀取正式產出檔，避免測試/過期 CSV 汙染前台資料
+    all_files = [
+        "data/d2c_full_database.csv",
+        "data/葉黃素_data.csv",
+        "data/益生菌_data.csv",
+        "data/魚油_data.csv",
+    ]
     df_list = []
 
     for filename in all_files:
+        if not os.path.exists(filename):
+            continue
         try:
             df = pd.read_csv(filename)
             
@@ -110,7 +117,7 @@ def load_data(keywords=["葉黃素", "益生菌", "魚油"]):
                 else: df['source'] = 'Other'
             
             # 推斷類別
-            if 'd2c_daiken' in filename.lower() or 'd2c_dietician' in filename.lower():
+            if 'd2c_full_database' in filename.lower() or 'd2c_daiken' in filename.lower() or 'd2c_dietician' in filename.lower():
                 df['category'] = df['title'].apply(get_category_from_title)
             else:
                 for cat in keywords:
