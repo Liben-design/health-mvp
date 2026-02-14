@@ -1,0 +1,15 @@
+{
+  "generated_at": "2026-02-13T00:10:48.919534",
+  "parse_metrics": {
+    "九五之丹": {
+      "domain": "https://www.95dan.com.tw/",
+      "parsed_urls": 29,
+      "capped_urls": 3,
+      "url_cap": 3
+    }
+  },
+  "success_metrics": {
+    "九五之丹": 3
+  },
+  "issues": []
+}

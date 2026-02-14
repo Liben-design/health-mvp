@@ -1,0 +1,312 @@
+[2026-02-12 22:46:29] stage=scan_url brand=九五之丹 url=https://www.95dan.com.tw/lutein
+error=Error("BrowserType.launch: Executable doesn't exist at /Users/liben/Library/Caches/ms-playwright/chromium_headless_shell-1208/chrome-headless-shell-mac-arm64/chrome-headless-shell\n╔════════════════════════════════════════════════════════════╗\n║ Looks like Playwright was just installed or updated.       ║\n║ Please run the following command to download new browsers: ║\n║                                                            ║\n║     playwright install                                     ║\n║                                                            ║\n║ <3 Playwright Team                                         ║\n╚════════════════════════════════════════════════════════════╝")
+traceback=Traceback (most recent call last):
+  File "/Users/liben/Library/Mobile Documents/com~apple~CloudDocs/VS Code/VITAGUIDE/data/batch_scanner.py", line 215, in scan_url_with_retry
+    result = await scanner.scan_url(url)
+  File "/Users/liben/Library/Mobile Documents/com~apple~CloudDocs/VS Code/VITAGUIDE/data/agent_d2c_scanner.py", line 304, in scan_url
+    browser = await p.chromium.launch(headless=True)
+  File "/Users/liben/Library/Python/3.9/lib/python/site-packages/playwright/async_api/_generated.py", line 14547, in launch
+    await self._impl_obj.launch(
+  File "/Users/liben/Library/Python/3.9/lib/python/site-packages/playwright/_impl/_browser_type.py", line 97, in launch
+    await self._channel.send(
+  File "/Users/liben/Library/Python/3.9/lib/python/site-packages/playwright/_impl/_connection.py", line 69, in send
+    return await self._connection.wrap_api_call(
+  File "/Users/liben/Library/Python/3.9/lib/python/site-packages/playwright/_impl/_connection.py", line 559, in wrap_api_call
+    raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+playwright._impl._errors.Error: BrowserType.launch: Executable doesn't exist at /Users/liben/Library/Caches/ms-playwright/chromium_headless_shell-1208/chrome-headless-shell-mac-arm64/chrome-headless-shell
+╔════════════════════════════════════════════════════════════╗
+║ Looks like Playwright was just installed or updated.       ║
+║ Please run the following command to download new browsers: ║
+║                                                            ║
+║     playwright install                                     ║
+║                                                            ║
+║ <3 Playwright Team                                         ║
+╚════════════════════════════════════════════════════════════╝
+
+--------------------------------------------------------------------------------
+[2026-02-12 22:46:29] stage=scan_url brand=九五之丹 url=https://www.95dan.com.tw/maca
+error=Error("BrowserType.launch: Executable doesn't exist at /Users/liben/Library/Caches/ms-playwright/chromium_headless_shell-1208/chrome-headless-shell-mac-arm64/chrome-headless-shell\n╔════════════════════════════════════════════════════════════╗\n║ Looks like Playwright was just installed or updated.       ║\n║ Please run the following command to download new browsers: ║\n║                                                            ║\n║     playwright install                                     ║\n║                                                            ║\n║ <3 Playwright Team                                         ║\n╚════════════════════════════════════════════════════════════╝")
+traceback=Traceback (most recent call last):
+  File "/Users/liben/Library/Mobile Documents/com~apple~CloudDocs/VS Code/VITAGUIDE/data/batch_scanner.py", line 215, in scan_url_with_retry
+    result = await scanner.scan_url(url)
+  File "/Users/liben/Library/Mobile Documents/com~apple~CloudDocs/VS Code/VITAGUIDE/data/agent_d2c_scanner.py", line 304, in scan_url
+    browser = await p.chromium.launch(headless=True)
+  File "/Users/liben/Library/Python/3.9/lib/python/site-packages/playwright/async_api/_generated.py", line 14547, in launch
+    await self._impl_obj.launch(
+  File "/Users/liben/Library/Python/3.9/lib/python/site-packages/playwright/_impl/_browser_type.py", line 97, in launch
+    await self._channel.send(
+  File "/Users/liben/Library/Python/3.9/lib/python/site-packages/playwright/_impl/_connection.py", line 69, in send
+    return await self._connection.wrap_api_call(
+  File "/Users/liben/Library/Python/3.9/lib/python/site-packages/playwright/_impl/_connection.py", line 559, in wrap_api_call
+    raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+playwright._impl._errors.Error: BrowserType.launch: Executable doesn't exist at /Users/liben/Library/Caches/ms-playwright/chromium_headless_shell-1208/chrome-headless-shell-mac-arm64/chrome-headless-shell
+╔════════════════════════════════════════════════════════════╗
+║ Looks like Playwright was just installed or updated.       ║
+║ Please run the following command to download new browsers: ║
+║                                                            ║
+║     playwright install                                     ║
+║                                                            ║
+║ <3 Playwright Team                                         ║
+╚════════════════════════════════════════════════════════════╝
+
+--------------------------------------------------------------------------------
+[2026-02-12 22:46:29] stage=scan_url brand=九五之丹 url=https://www.95dan.com.tw/b+zinc
+error=Error("BrowserType.launch: Executable doesn't exist at /Users/liben/Library/Caches/ms-playwright/chromium_headless_shell-1208/chrome-headless-shell-mac-arm64/chrome-headless-shell\n╔════════════════════════════════════════════════════════════╗\n║ Looks like Playwright was just installed or updated.       ║\n║ Please run the following command to download new browsers: ║\n║                                                            ║\n║     playwright install                                     ║\n║                                                            ║\n║ <3 Playwright Team                                         ║\n╚════════════════════════════════════════════════════════════╝")
+traceback=Traceback (most recent call last):
+  File "/Users/liben/Library/Mobile Documents/com~apple~CloudDocs/VS Code/VITAGUIDE/data/batch_scanner.py", line 215, in scan_url_with_retry
+    result = await scanner.scan_url(url)
+  File "/Users/liben/Library/Mobile Documents/com~apple~CloudDocs/VS Code/VITAGUIDE/data/agent_d2c_scanner.py", line 304, in scan_url
+    browser = await p.chromium.launch(headless=True)
+  File "/Users/liben/Library/Python/3.9/lib/python/site-packages/playwright/async_api/_generated.py", line 14547, in launch
+    await self._impl_obj.launch(
+  File "/Users/liben/Library/Python/3.9/lib/python/site-packages/playwright/_impl/_browser_type.py", line 97, in launch
+    await self._channel.send(
+  File "/Users/liben/Library/Python/3.9/lib/python/site-packages/playwright/_impl/_connection.py", line 69, in send
+    return await self._connection.wrap_api_call(
+  File "/Users/liben/Library/Python/3.9/lib/python/site-packages/playwright/_impl/_connection.py", line 559, in wrap_api_call
+    raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+playwright._impl._errors.Error: BrowserType.launch: Executable doesn't exist at /Users/liben/Library/Caches/ms-playwright/chromium_headless_shell-1208/chrome-headless-shell-mac-arm64/chrome-headless-shell
+╔════════════════════════════════════════════════════════════╗
+║ Looks like Playwright was just installed or updated.       ║
+║ Please run the following command to download new browsers: ║
+║                                                            ║
+║     playwright install                                     ║
+║                                                            ║
+║ <3 Playwright Team                                         ║
+╚════════════════════════════════════════════════════════════╝
+
+--------------------------------------------------------------------------------
+[2026-02-12 22:46:31] stage=scan_url brand=九五之丹 url=https://www.95dan.com.tw/lutein
+error=Error("BrowserType.launch: Executable doesn't exist at /Users/liben/Library/Caches/ms-playwright/chromium_headless_shell-1208/chrome-headless-shell-mac-arm64/chrome-headless-shell\n╔════════════════════════════════════════════════════════════╗\n║ Looks like Playwright was just installed or updated.       ║\n║ Please run the following command to download new browsers: ║\n║                                                            ║\n║     playwright install                                     ║\n║                                                            ║\n║ <3 Playwright Team                                         ║\n╚════════════════════════════════════════════════════════════╝")
+traceback=Traceback (most recent call last):
+  File "/Users/liben/Library/Mobile Documents/com~apple~CloudDocs/VS Code/VITAGUIDE/data/batch_scanner.py", line 215, in scan_url_with_retry
+    result = await scanner.scan_url(url)
+  File "/Users/liben/Library/Mobile Documents/com~apple~CloudDocs/VS Code/VITAGUIDE/data/agent_d2c_scanner.py", line 304, in scan_url
+    browser = await p.chromium.launch(headless=True)
+  File "/Users/liben/Library/Python/3.9/lib/python/site-packages/playwright/async_api/_generated.py", line 14547, in launch
+    await self._impl_obj.launch(
+  File "/Users/liben/Library/Python/3.9/lib/python/site-packages/playwright/_impl/_browser_type.py", line 97, in launch
+    await self._channel.send(
+  File "/Users/liben/Library/Python/3.9/lib/python/site-packages/playwright/_impl/_connection.py", line 69, in send
+    return await self._connection.wrap_api_call(
+  File "/Users/liben/Library/Python/3.9/lib/python/site-packages/playwright/_impl/_connection.py", line 559, in wrap_api_call
+    raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+playwright._impl._errors.Error: BrowserType.launch: Executable doesn't exist at /Users/liben/Library/Caches/ms-playwright/chromium_headless_shell-1208/chrome-headless-shell-mac-arm64/chrome-headless-shell
+╔════════════════════════════════════════════════════════════╗
+║ Looks like Playwright was just installed or updated.       ║
+║ Please run the following command to download new browsers: ║
+║                                                            ║
+║     playwright install                                     ║
+║                                                            ║
+║ <3 Playwright Team                                         ║
+╚════════════════════════════════════════════════════════════╝
+
+--------------------------------------------------------------------------------
+[2026-02-12 22:46:31] stage=scan_url brand=九五之丹 url=https://www.95dan.com.tw/maca
+error=Error("BrowserType.launch: Executable doesn't exist at /Users/liben/Library/Caches/ms-playwright/chromium_headless_shell-1208/chrome-headless-shell-mac-arm64/chrome-headless-shell\n╔════════════════════════════════════════════════════════════╗\n║ Looks like Playwright was just installed or updated.       ║\n║ Please run the following command to download new browsers: ║\n║                                                            ║\n║     playwright install                                     ║\n║                                                            ║\n║ <3 Playwright Team                                         ║\n╚════════════════════════════════════════════════════════════╝")
+traceback=Traceback (most recent call last):
+  File "/Users/liben/Library/Mobile Documents/com~apple~CloudDocs/VS Code/VITAGUIDE/data/batch_scanner.py", line 215, in scan_url_with_retry
+    result = await scanner.scan_url(url)
+  File "/Users/liben/Library/Mobile Documents/com~apple~CloudDocs/VS Code/VITAGUIDE/data/agent_d2c_scanner.py", line 304, in scan_url
+    browser = await p.chromium.launch(headless=True)
+  File "/Users/liben/Library/Python/3.9/lib/python/site-packages/playwright/async_api/_generated.py", line 14547, in launch
+    await self._impl_obj.launch(
+  File "/Users/liben/Library/Python/3.9/lib/python/site-packages/playwright/_impl/_browser_type.py", line 97, in launch
+    await self._channel.send(
+  File "/Users/liben/Library/Python/3.9/lib/python/site-packages/playwright/_impl/_connection.py", line 69, in send
+    return await self._connection.wrap_api_call(
+  File "/Users/liben/Library/Python/3.9/lib/python/site-packages/playwright/_impl/_connection.py", line 559, in wrap_api_call
+    raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+playwright._impl._errors.Error: BrowserType.launch: Executable doesn't exist at /Users/liben/Library/Caches/ms-playwright/chromium_headless_shell-1208/chrome-headless-shell-mac-arm64/chrome-headless-shell
+╔════════════════════════════════════════════════════════════╗
+║ Looks like Playwright was just installed or updated.       ║
+║ Please run the following command to download new browsers: ║
+║                                                            ║
+║     playwright install                                     ║
+║                                                            ║
+║ <3 Playwright Team                                         ║
+╚════════════════════════════════════════════════════════════╝
+
+--------------------------------------------------------------------------------
+[2026-02-12 22:46:31] stage=scan_url brand=九五之丹 url=https://www.95dan.com.tw/b+zinc
+error=Error("BrowserType.launch: Executable doesn't exist at /Users/liben/Library/Caches/ms-playwright/chromium_headless_shell-1208/chrome-headless-shell-mac-arm64/chrome-headless-shell\n╔════════════════════════════════════════════════════════════╗\n║ Looks like Playwright was just installed or updated.       ║\n║ Please run the following command to download new browsers: ║\n║                                                            ║\n║     playwright install                                     ║\n║                                                            ║\n║ <3 Playwright Team                                         ║\n╚════════════════════════════════════════════════════════════╝")
+traceback=Traceback (most recent call last):
+  File "/Users/liben/Library/Mobile Documents/com~apple~CloudDocs/VS Code/VITAGUIDE/data/batch_scanner.py", line 215, in scan_url_with_retry
+    result = await scanner.scan_url(url)
+  File "/Users/liben/Library/Mobile Documents/com~apple~CloudDocs/VS Code/VITAGUIDE/data/agent_d2c_scanner.py", line 304, in scan_url
+    browser = await p.chromium.launch(headless=True)
+  File "/Users/liben/Library/Python/3.9/lib/python/site-packages/playwright/async_api/_generated.py", line 14547, in launch
+    await self._impl_obj.launch(
+  File "/Users/liben/Library/Python/3.9/lib/python/site-packages/playwright/_impl/_browser_type.py", line 97, in launch
+    await self._channel.send(
+  File "/Users/liben/Library/Python/3.9/lib/python/site-packages/playwright/_impl/_connection.py", line 69, in send
+    return await self._connection.wrap_api_call(
+  File "/Users/liben/Library/Python/3.9/lib/python/site-packages/playwright/_impl/_connection.py", line 559, in wrap_api_call
+    raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+playwright._impl._errors.Error: BrowserType.launch: Executable doesn't exist at /Users/liben/Library/Caches/ms-playwright/chromium_headless_shell-1208/chrome-headless-shell-mac-arm64/chrome-headless-shell
+╔════════════════════════════════════════════════════════════╗
+║ Looks like Playwright was just installed or updated.       ║
+║ Please run the following command to download new browsers: ║
+║                                                            ║
+║     playwright install                                     ║
+║                                                            ║
+║ <3 Playwright Team                                         ║
+╚════════════════════════════════════════════════════════════╝
+
+--------------------------------------------------------------------------------
+[2026-02-12 22:46:35] stage=scan_url brand=九五之丹 url=https://www.95dan.com.tw/lutein
+error=Error("BrowserType.launch: Executable doesn't exist at /Users/liben/Library/Caches/ms-playwright/chromium_headless_shell-1208/chrome-headless-shell-mac-arm64/chrome-headless-shell\n╔════════════════════════════════════════════════════════════╗\n║ Looks like Playwright was just installed or updated.       ║\n║ Please run the following command to download new browsers: ║\n║                                                            ║\n║     playwright install                                     ║\n║                                                            ║\n║ <3 Playwright Team                                         ║\n╚════════════════════════════════════════════════════════════╝")
+traceback=Traceback (most recent call last):
+  File "/Users/liben/Library/Mobile Documents/com~apple~CloudDocs/VS Code/VITAGUIDE/data/batch_scanner.py", line 215, in scan_url_with_retry
+    result = await scanner.scan_url(url)
+  File "/Users/liben/Library/Mobile Documents/com~apple~CloudDocs/VS Code/VITAGUIDE/data/agent_d2c_scanner.py", line 304, in scan_url
+    browser = await p.chromium.launch(headless=True)
+  File "/Users/liben/Library/Python/3.9/lib/python/site-packages/playwright/async_api/_generated.py", line 14547, in launch
+    await self._impl_obj.launch(
+  File "/Users/liben/Library/Python/3.9/lib/python/site-packages/playwright/_impl/_browser_type.py", line 97, in launch
+    await self._channel.send(
+  File "/Users/liben/Library/Python/3.9/lib/python/site-packages/playwright/_impl/_connection.py", line 69, in send
+    return await self._connection.wrap_api_call(
+  File "/Users/liben/Library/Python/3.9/lib/python/site-packages/playwright/_impl/_connection.py", line 559, in wrap_api_call
+    raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+playwright._impl._errors.Error: BrowserType.launch: Executable doesn't exist at /Users/liben/Library/Caches/ms-playwright/chromium_headless_shell-1208/chrome-headless-shell-mac-arm64/chrome-headless-shell
+╔════════════════════════════════════════════════════════════╗
+║ Looks like Playwright was just installed or updated.       ║
+║ Please run the following command to download new browsers: ║
+║                                                            ║
+║     playwright install                                     ║
+║                                                            ║
+║ <3 Playwright Team                                         ║
+╚════════════════════════════════════════════════════════════╝
+
+--------------------------------------------------------------------------------
+[2026-02-12 22:46:35] stage=scan_url brand=九五之丹 url=https://www.95dan.com.tw/b+zinc
+error=Error("BrowserType.launch: Executable doesn't exist at /Users/liben/Library/Caches/ms-playwright/chromium_headless_shell-1208/chrome-headless-shell-mac-arm64/chrome-headless-shell\n╔════════════════════════════════════════════════════════════╗\n║ Looks like Playwright was just installed or updated.       ║\n║ Please run the following command to download new browsers: ║\n║                                                            ║\n║     playwright install                                     ║\n║                                                            ║\n║ <3 Playwright Team                                         ║\n╚════════════════════════════════════════════════════════════╝")
+traceback=Traceback (most recent call last):
+  File "/Users/liben/Library/Mobile Documents/com~apple~CloudDocs/VS Code/VITAGUIDE/data/batch_scanner.py", line 215, in scan_url_with_retry
+    result = await scanner.scan_url(url)
+  File "/Users/liben/Library/Mobile Documents/com~apple~CloudDocs/VS Code/VITAGUIDE/data/agent_d2c_scanner.py", line 304, in scan_url
+    browser = await p.chromium.launch(headless=True)
+  File "/Users/liben/Library/Python/3.9/lib/python/site-packages/playwright/async_api/_generated.py", line 14547, in launch
+    await self._impl_obj.launch(
+  File "/Users/liben/Library/Python/3.9/lib/python/site-packages/playwright/_impl/_browser_type.py", line 97, in launch
+    await self._channel.send(
+  File "/Users/liben/Library/Python/3.9/lib/python/site-packages/playwright/_impl/_connection.py", line 69, in send
+    return await self._connection.wrap_api_call(
+  File "/Users/liben/Library/Python/3.9/lib/python/site-packages/playwright/_impl/_connection.py", line 559, in wrap_api_call
+    raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+playwright._impl._errors.Error: BrowserType.launch: Executable doesn't exist at /Users/liben/Library/Caches/ms-playwright/chromium_headless_shell-1208/chrome-headless-shell-mac-arm64/chrome-headless-shell
+╔════════════════════════════════════════════════════════════╗
+║ Looks like Playwright was just installed or updated.       ║
+║ Please run the following command to download new browsers: ║
+║                                                            ║
+║     playwright install                                     ║
+║                                                            ║
+║ <3 Playwright Team                                         ║
+╚════════════════════════════════════════════════════════════╝
+
+--------------------------------------------------------------------------------
+[2026-02-12 22:46:35] stage=scan_url brand=九五之丹 url=https://www.95dan.com.tw/maca
+error=Error("BrowserType.launch: Executable doesn't exist at /Users/liben/Library/Caches/ms-playwright/chromium_headless_shell-1208/chrome-headless-shell-mac-arm64/chrome-headless-shell\n╔════════════════════════════════════════════════════════════╗\n║ Looks like Playwright was just installed or updated.       ║\n║ Please run the following command to download new browsers: ║\n║                                                            ║\n║     playwright install                                     ║\n║                                                            ║\n║ <3 Playwright Team                                         ║\n╚════════════════════════════════════════════════════════════╝")
+traceback=Traceback (most recent call last):
+  File "/Users/liben/Library/Mobile Documents/com~apple~CloudDocs/VS Code/VITAGUIDE/data/batch_scanner.py", line 215, in scan_url_with_retry
+    result = await scanner.scan_url(url)
+  File "/Users/liben/Library/Mobile Documents/com~apple~CloudDocs/VS Code/VITAGUIDE/data/agent_d2c_scanner.py", line 304, in scan_url
+    browser = await p.chromium.launch(headless=True)
+  File "/Users/liben/Library/Python/3.9/lib/python/site-packages/playwright/async_api/_generated.py", line 14547, in launch
+    await self._impl_obj.launch(
+  File "/Users/liben/Library/Python/3.9/lib/python/site-packages/playwright/_impl/_browser_type.py", line 97, in launch
+    await self._channel.send(
+  File "/Users/liben/Library/Python/3.9/lib/python/site-packages/playwright/_impl/_connection.py", line 69, in send
+    return await self._connection.wrap_api_call(
+  File "/Users/liben/Library/Python/3.9/lib/python/site-packages/playwright/_impl/_connection.py", line 559, in wrap_api_call
+    raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+playwright._impl._errors.Error: BrowserType.launch: Executable doesn't exist at /Users/liben/Library/Caches/ms-playwright/chromium_headless_shell-1208/chrome-headless-shell-mac-arm64/chrome-headless-shell
+╔════════════════════════════════════════════════════════════╗
+║ Looks like Playwright was just installed or updated.       ║
+║ Please run the following command to download new browsers: ║
+║                                                            ║
+║     playwright install                                     ║
+║                                                            ║
+║ <3 Playwright Team                                         ║
+╚════════════════════════════════════════════════════════════╝
+
+--------------------------------------------------------------------------------
+[2026-02-12 22:47:05] stage=scan_url brand=九五之丹 url=https://httpstat.us/200?sleep=45000
+error=Error("BrowserType.launch: Executable doesn't exist at /Users/liben/Library/Caches/ms-playwright/chromium_headless_shell-1208/chrome-headless-shell-mac-arm64/chrome-headless-shell\n╔════════════════════════════════════════════════════════════╗\n║ Looks like Playwright was just installed or updated.       ║\n║ Please run the following command to download new browsers: ║\n║                                                            ║\n║     playwright install                                     ║\n║                                                            ║\n║ <3 Playwright Team                                         ║\n╚════════════════════════════════════════════════════════════╝")
+traceback=Traceback (most recent call last):
+  File "/Users/liben/Library/Mobile Documents/com~apple~CloudDocs/VS Code/VITAGUIDE/data/batch_scanner.py", line 215, in scan_url_with_retry
+    result = await scanner.scan_url(url)
+  File "/Users/liben/Library/Mobile Documents/com~apple~CloudDocs/VS Code/VITAGUIDE/data/agent_d2c_scanner.py", line 304, in scan_url
+    browser = await p.chromium.launch(headless=True)
+  File "/Users/liben/Library/Python/3.9/lib/python/site-packages/playwright/async_api/_generated.py", line 14547, in launch
+    await self._impl_obj.launch(
+  File "/Users/liben/Library/Python/3.9/lib/python/site-packages/playwright/_impl/_browser_type.py", line 97, in launch
+    await self._channel.send(
+  File "/Users/liben/Library/Python/3.9/lib/python/site-packages/playwright/_impl/_connection.py", line 69, in send
+    return await self._connection.wrap_api_call(
+  File "/Users/liben/Library/Python/3.9/lib/python/site-packages/playwright/_impl/_connection.py", line 559, in wrap_api_call
+    raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+playwright._impl._errors.Error: BrowserType.launch: Executable doesn't exist at /Users/liben/Library/Caches/ms-playwright/chromium_headless_shell-1208/chrome-headless-shell-mac-arm64/chrome-headless-shell
+╔════════════════════════════════════════════════════════════╗
+║ Looks like Playwright was just installed or updated.       ║
+║ Please run the following command to download new browsers: ║
+║                                                            ║
+║     playwright install                                     ║
+║                                                            ║
+║ <3 Playwright Team                                         ║
+╚════════════════════════════════════════════════════════════╝
+
+--------------------------------------------------------------------------------
+[2026-02-12 22:47:07] stage=scan_url brand=九五之丹 url=https://httpstat.us/200?sleep=45000
+error=Error("BrowserType.launch: Executable doesn't exist at /Users/liben/Library/Caches/ms-playwright/chromium_headless_shell-1208/chrome-headless-shell-mac-arm64/chrome-headless-shell\n╔════════════════════════════════════════════════════════════╗\n║ Looks like Playwright was just installed or updated.       ║\n║ Please run the following command to download new browsers: ║\n║                                                            ║\n║     playwright install                                     ║\n║                                                            ║\n║ <3 Playwright Team                                         ║\n╚════════════════════════════════════════════════════════════╝")
+traceback=Traceback (most recent call last):
+  File "/Users/liben/Library/Mobile Documents/com~apple~CloudDocs/VS Code/VITAGUIDE/data/batch_scanner.py", line 215, in scan_url_with_retry
+    result = await scanner.scan_url(url)
+  File "/Users/liben/Library/Mobile Documents/com~apple~CloudDocs/VS Code/VITAGUIDE/data/agent_d2c_scanner.py", line 304, in scan_url
+    browser = await p.chromium.launch(headless=True)
+  File "/Users/liben/Library/Python/3.9/lib/python/site-packages/playwright/async_api/_generated.py", line 14547, in launch
+    await self._impl_obj.launch(
+  File "/Users/liben/Library/Python/3.9/lib/python/site-packages/playwright/_impl/_browser_type.py", line 97, in launch
+    await self._channel.send(
+  File "/Users/liben/Library/Python/3.9/lib/python/site-packages/playwright/_impl/_connection.py", line 69, in send
+    return await self._connection.wrap_api_call(
+  File "/Users/liben/Library/Python/3.9/lib/python/site-packages/playwright/_impl/_connection.py", line 559, in wrap_api_call
+    raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+playwright._impl._errors.Error: BrowserType.launch: Executable doesn't exist at /Users/liben/Library/Caches/ms-playwright/chromium_headless_shell-1208/chrome-headless-shell-mac-arm64/chrome-headless-shell
+╔════════════════════════════════════════════════════════════╗
+║ Looks like Playwright was just installed or updated.       ║
+║ Please run the following command to download new browsers: ║
+║                                                            ║
+║     playwright install                                     ║
+║                                                            ║
+║ <3 Playwright Team                                         ║
+╚════════════════════════════════════════════════════════════╝
+
+--------------------------------------------------------------------------------
+[2026-02-12 22:47:11] stage=scan_url brand=九五之丹 url=https://httpstat.us/200?sleep=45000
+error=Error("BrowserType.launch: Executable doesn't exist at /Users/liben/Library/Caches/ms-playwright/chromium_headless_shell-1208/chrome-headless-shell-mac-arm64/chrome-headless-shell\n╔════════════════════════════════════════════════════════════╗\n║ Looks like Playwright was just installed or updated.       ║\n║ Please run the following command to download new browsers: ║\n║                                                            ║\n║     playwright install                                     ║\n║                                                            ║\n║ <3 Playwright Team                                         ║\n╚════════════════════════════════════════════════════════════╝")
+traceback=Traceback (most recent call last):
+  File "/Users/liben/Library/Mobile Documents/com~apple~CloudDocs/VS Code/VITAGUIDE/data/batch_scanner.py", line 215, in scan_url_with_retry
+    result = await scanner.scan_url(url)
+  File "/Users/liben/Library/Mobile Documents/com~apple~CloudDocs/VS Code/VITAGUIDE/data/agent_d2c_scanner.py", line 304, in scan_url
+    browser = await p.chromium.launch(headless=True)
+  File "/Users/liben/Library/Python/3.9/lib/python/site-packages/playwright/async_api/_generated.py", line 14547, in launch
+    await self._impl_obj.launch(
+  File "/Users/liben/Library/Python/3.9/lib/python/site-packages/playwright/_impl/_browser_type.py", line 97, in launch
+    await self._channel.send(
+  File "/Users/liben/Library/Python/3.9/lib/python/site-packages/playwright/_impl/_connection.py", line 69, in send
+    return await self._connection.wrap_api_call(
+  File "/Users/liben/Library/Python/3.9/lib/python/site-packages/playwright/_impl/_connection.py", line 559, in wrap_api_call
+    raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+playwright._impl._errors.Error: BrowserType.launch: Executable doesn't exist at /Users/liben/Library/Caches/ms-playwright/chromium_headless_shell-1208/chrome-headless-shell-mac-arm64/chrome-headless-shell
+╔════════════════════════════════════════════════════════════╗
+║ Looks like Playwright was just installed or updated.       ║
+║ Please run the following command to download new browsers: ║
+║                                                            ║
+║     playwright install                                     ║
+║                                                            ║
+║ <3 Playwright Team                                         ║
+╚════════════════════════════════════════════════════════════╝
+
+--------------------------------------------------------------------------------

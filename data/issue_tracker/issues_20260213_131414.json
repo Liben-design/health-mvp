@@ -1,0 +1,85 @@
+{
+  "generated_at": "2026-02-13T13:14:14.172492",
+  "parse_metrics": {
+    "大研生醫": {
+      "domain": "https://www.daikenshop.com/",
+      "parsed_urls": 66,
+      "capped_urls": 66,
+      "url_cap": 100
+    },
+    "vitabox": {
+      "domain": "https://shop.vitabox.com.tw/",
+      "parsed_urls": 30,
+      "capped_urls": 30,
+      "url_cap": 100
+    },
+    "營養師輕食": {
+      "domain": "https://www.dietician.com.tw/",
+      "parsed_urls": 16,
+      "capped_urls": 16,
+      "url_cap": 100
+    },
+    "BHK's": {
+      "domain": "https://www.bhks.com.tw/",
+      "parsed_urls": 552,
+      "capped_urls": 100,
+      "url_cap": 100
+    },
+    "悠活原力": {
+      "domain": "https://www.yohopower.tw/",
+      "parsed_urls": 96,
+      "capped_urls": 96,
+      "url_cap": 100
+    },
+    "藥師健生活": {
+      "domain": "https://www.phargoods.com/",
+      "parsed_urls": 150,
+      "capped_urls": 100,
+      "url_cap": 100
+    },
+    "達摩本草": {
+      "domain": "https://www.damokampo.com/",
+      "parsed_urls": 106,
+      "capped_urls": 100,
+      "url_cap": 100
+    },
+    "米鴻生醫": {
+      "domain": "https://www.mihong.com.tw/",
+      "parsed_urls": 5,
+      "capped_urls": 5,
+      "url_cap": 100
+    },
+    "配方時代": {
+      "domain": "https://healthformula.com.tw/",
+      "parsed_urls": 19,
+      "capped_urls": 19,
+      "url_cap": 100
+    },
+    "義美生醫": {
+      "domain": "https://www.biomedimei.com/",
+      "parsed_urls": 65,
+      "capped_urls": 65,
+      "url_cap": 100
+    },
+    "大醫生技": {
+      "domain": "https://www.greencome.com.tw/",
+      "parsed_urls": 56,
+      "capped_urls": 56,
+      "url_cap": 100
+    }
+  },
+  "success_metrics": {
+    "大研生醫": 47,
+    "vitabox": 30,
+    "營養師輕食": 14,
+    "BHK's": 100,
+    "悠活原力": 96,
+    "藥師健生活": 100,
+    "達摩本草": 100,
+    "米鴻生醫": 5,
+    "配方時代": 11,
+    "義美生醫": 63,
+    "大醫生技": 56
+  },
+  "issues": []
+}

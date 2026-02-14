@@ -1,0 +1,37 @@
+{
+  "generated_at": "2026-02-13T11:13:30.612008",
+  "parse_metrics": {
+    "營養師輕食": {
+      "domain": "https://www.dietician.com.tw/",
+      "parsed_urls": 16,
+      "capped_urls": 16,
+      "url_cap": 40
+    },
+    "vitabox": {
+      "domain": "https://shop.vitabox.com.tw/",
+      "parsed_urls": 30,
+      "capped_urls": 30,
+      "url_cap": 40
+    },
+    "配方時代": {
+      "domain": "https://healthformula.com.tw/",
+      "parsed_urls": 49,
+      "capped_urls": 40,
+      "url_cap": 40
+    }
+  },
+  "success_metrics": {
+    "營養師輕食": 14,
+    "vitabox": 30,
+    "配方時代": 12
+  },
+  "issues": [
+    {
+      "severity": "P1",
+      "brand": "配方時代",
+      "stage": "extraction_quality",
+      "problem": "URL→有效資料轉換率偏低 (12/40, 30.0%)",
+      "action": "抽樣檢查失敗 URL，區分『頁面不可達 / selector 失效 / LLM 解析失敗』後定向修復"
+    }
+  ]
+}

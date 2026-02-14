@@ -1,0 +1,21 @@
+{
+  "generated_at": "2026-02-12T23:16:55.945150",
+  "parse_metrics": {
+    "九五之丹": {
+      "domain": "https://www.95dan.com.tw/",
+      "parsed_urls": 22,
+      "capped_urls": 8,
+      "url_cap": 8
+    }
+  },
+  "success_metrics": {},
+  "issues": [
+    {
+      "severity": "P1",
+      "brand": "九五之丹",
+      "stage": "extraction_quality",
+      "problem": "URL→有效資料轉換率偏低 (0/8, 0.0%)",
+      "action": "抽樣檢查失敗 URL，區分『頁面不可達 / selector 失效 / LLM 解析失敗』後定向修復"
+    }
+  ]
+}

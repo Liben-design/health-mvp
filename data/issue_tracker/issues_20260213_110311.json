@@ -1,0 +1,15 @@
+{
+  "generated_at": "2026-02-13T11:03:11.831786",
+  "parse_metrics": {
+    "vitabox": {
+      "domain": "https://shop.vitabox.com.tw/",
+      "parsed_urls": 30,
+      "capped_urls": 30,
+      "url_cap": 200
+    }
+  },
+  "success_metrics": {
+    "vitabox": 30
+  },
+  "issues": []
+}

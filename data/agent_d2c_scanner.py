@@ -68,7 +68,8 @@ class AgentD2CScanner:
         if "vitabox" in url or "shopline" in url:
             prioritized = ".same-price .price, .price-regular .price, .js-price .price, .product-price, .price"
             try:
-                await page.wait_for_selector(prioritized, state="visible", timeout=30000)
+                # 避免單頁等待過久導致整體 page timeout，被誤判為卡死
+                await page.wait_for_selector(prioritized, state="attached", timeout=8000)
                 return
             except:
                 pass
@@ -395,6 +396,65 @@ class AgentD2CScanner:
 
         return 0
 
+    def _extract_shopline_price_legacy(self, html_content):
+        """
+        Legacy Vitabox/Shopline regex strategy transplant:
+        app.value('product', {...});
+        """
+        if not html_content:
+            return 0
+
+        # 1) Legacy pattern: app.value('product', { ... });
+        try:
+            m = re.search(r"app\.value\('product',\s*(\{.*?\})\s*\);", html_content, re.DOTALL)
+            if m:
+                obj = json.loads(m.group(1))
+                price = obj.get("price")
+                if isinstance(price, dict):
+                    cents = price.get("cents", 0)
+                    if isinstance(cents, (int, float)) and cents > 0:
+                        return int(cents)
+                if isinstance(price, (int, float)) and price > 0:
+                    return int(price)
+                if isinstance(price, str):
+                    v = int(re.sub(r'[^\d]', '', price) or 0)
+                    if v > 0:
+                        return v
+        except Exception as e:
+            print(f"⚠️ [Agent] Legacy Shopline 物件價格解析失敗: {e}")
+
+        # 2) Backward compatible pattern currently used in scanner
+        try:
+            m = re.search(r"app\.value\('product',\s*JSON\.parse\('(.+?)'\)\);", html_content, re.DOTALL)
+            if m:
+                payload = m.group(1)
+                payload = payload.encode('utf-8').decode('unicode_escape')
+                payload = html_lib.unescape(payload)
+                product = json.loads(payload)
+
+                candidates = []
+                for key in ["price_sale", "price", "lowest_member_price"]:
+                    obj = product.get(key) or {}
+                    cents = obj.get("cents", 0)
+                    if isinstance(cents, (int, float)) and cents > 0:
+                        candidates.append(int(cents))
+
+                for v in product.get("variations", []) or []:
+                    if not isinstance(v, dict):
+                        continue
+                    for key in ["price_sale", "price", "member_price"]:
+                        obj = v.get(key) or {}
+                        cents = obj.get("cents", 0)
+                        if isinstance(cents, (int, float)) and cents > 0:
+                            candidates.append(int(cents))
+
+                if candidates:
+                    return min(candidates)
+        except Exception as e:
+            print(f"⚠️ [Agent] Legacy Shopline JSON.parse 價格解析失敗: {e}")
+
+        return 0
+
     async def scan_url(self, url):
         """掃描單一 URL"""
         url = self._normalize_url(url)
@@ -457,6 +517,9 @@ class AgentD2CScanner:
                 # 抓取基礎資料 (圖片與 HTML)
                 content = await page.content()
                 html_price = self._extract_price_from_html_content(content)
+                legacy_shopline_price = 0
+                if "vitabox" in url or "shopline" in url:
+                    legacy_shopline_price = self._extract_shopline_price_legacy(content)
                 if html_price == 0 and dom_price == 0 and ("vitabox" in url or "shopline" in url):
                     try:
                         with open("debug_vitabox_page.html", "w", encoding="utf-8") as f:
@@ -495,6 +558,8 @@ class AgentD2CScanner:
                 else:
                     if dom_price > 0:
                         final_price = dom_price
+                    elif legacy_shopline_price > 0:
+                        final_price = legacy_shopline_price
                     elif html_price > 0:
                         final_price = html_price
 

@@ -1,0 +1,22 @@
+{
+  "generated_at": "2026-02-13T11:17:44.214581",
+  "parse_metrics": {
+    "營養師輕食": {
+      "domain": "https://www.dietician.com.tw/",
+      "parsed_urls": 16,
+      "capped_urls": 16,
+      "url_cap": 40
+    },
+    "配方時代": {
+      "domain": "https://healthformula.com.tw/",
+      "parsed_urls": 19,
+      "capped_urls": 19,
+      "url_cap": 40
+    }
+  },
+  "success_metrics": {
+    "營養師輕食": 14,
+    "配方時代": 11
+  },
+  "issues": []
+}

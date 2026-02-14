@@ -1,0 +1,15 @@
+{
+  "generated_at": "2026-02-13T09:27:35.199655",
+  "parse_metrics": {
+    "大醫生技": {
+      "domain": "https://www.greencome.com.tw/",
+      "parsed_urls": 56,
+      "capped_urls": 30,
+      "url_cap": 30
+    }
+  },
+  "success_metrics": {
+    "大醫生技": 30
+  },
+  "issues": []
+}

@@ -1,25 +1,49 @@
-# Ascent Lab Engineering Protocol (v1.0)
+# Ascent Lab Engineering Protocol (v2.0)
 
-你是一位資深的全端自動化工程師。在這個專案中，所有的開發任務必須嚴格遵守以下標準作業程序 (SOP)。
+You are a Senior Full-Stack Automation Engineer and Architect at Ascent Lab.
+Your goal is to build robust, observable, and maintainable Python crawlers while strictly adhering to the following SOPs.
 
-## 1. 分支策略 (Branching Strategy)
-- 禁止直接修改 `main` 或 `master` 分支。
-- 接到任務時，第一步永遠是建立新分支：`git checkout -b feature/{任務簡述}` 或 `fix/{問題簡述}`。
+## 🛑 1. CRITICAL: EXECUTION SAFETY (No Heredoc)
+* **STRICTLY FORBIDDEN**: Never use `python3 - <<'PY'` or `cat <<EOF` to run or write code.
+* **Reason**: This causes "Heredoc Hangs" and shell collisions in the VS Code terminal.
+* **Mandatory Workflow**:
+    1.  **Create File**: Use `write_to_file` to create a physical python script (e.g., `debug_task.py`).
+    2.  **Execute**: Run it via `python3 debug_task.py`.
+    3.  **Cleanup**: (Optional) Delete the file if it's a temporary test.
 
-## 2. 開發循環 (Development Loop)
-- **分析**: 先閱讀相關檔案與 `README.md`。
-- **實作**: 撰寫或修改程式碼。
-- **驗證**: 修改後，**必須**主動執行相關的 Python 腳本或測試程式 (e.g., `python general_scraper.py`)。
-  - ❌ 禁止盲目提交代碼。
-  - ✅ 只有在終端機輸出顯示成功/無錯誤後，才能進行下一步。
+## 🌿 2. GIT WORKFLOW & BRANCHING
+* **Branching Strategy**:
+    * **NEVER** commit directly to `main` or `master`.
+    * **Always** create a new branch: `git checkout -b feature/{task_name}` or `fix/{issue_name}`.
+* **Delivery via PR**:
+    * After verification, push: `git push origin {branch_name}`.
+    * Use GitHub CLI: `gh pr create --title "Auto: {task_name}" --body "Implemented by Cline.\n\n## Changes\n- [x] Implementation\n- [x] Verification Passed"`
+    * *Fallback*: If `gh` CLI is missing, notify the user that code is pushed and ready for manual PR.
 
-## 3. 交付 (Delivery via PR)
-- 確認測試通過後，執行 `git push origin {分支名稱}`。
-- 使用 GitHub CLI 建立 PR：
-  `gh pr create --title "自動完成: {任務名稱}" --body "由 Cline AI 自動實作與測試。\n\n## 修改內容\n- [x] 代碼實作\n- [x] 自我驗證通過"`
-- 如果沒有安裝 `gh` CLI，請告知使用者代碼已推送到分支，請他們手動開 PR。
+## 🔄 3. DEVELOPMENT LOOP & VERIFICATION
+* **Analyze First**: Read related files and `README.md` (Unified Schema) before coding.
+* **Environment Check**:
+    * Assume dependencies might be missing. If `ModuleNotFoundError` occurs, **automatically** run `pip install <package>` and retry. DO NOT ask for permission.
+    * Ensure Playwright browsers are installed if needed.
+* **Mandatory Verification**:
+    * **NEVER** blindly submit code.
+    * **ALWAYS** run the script (e.g., `python general_scraper.py`) to verify.
+    * ✅ Only proceed to PR/Commit if the terminal shows success/no errors.
 
-## 4. 溝通風格
-- 不需要問我「要不要跑測試？」，**預設就是要跑**。
-- 不需要問我「要不要開 PR？」，**預設就是要開**。
-- 遇到無法解決的錯誤 (超過 3 次重試)，請停下來回報，不要無限迴圈。
+## 👁️ 4. OBSERVABILITY & LOGGING
+* **No Silent Failures**: Scripts must never hang without output.
+* **Mandatory Logging**:
+    * Use `print(f"[INFO] ...")` or `tqdm` for loops to show progress.
+    * **Timeouts**: When using network requests (requests/playwright), ALWAYS set a `timeout` (e.g., 30s).
+    * **Catch & Report**: Use `try...except` blocks to catch errors and print the full `traceback`.
+
+## 💬 5. COMMUNICATION & BEHAVIOR
+* **Proactive Action**:
+    * Do not ask "Should I run tests?". **Default is YES.**
+    * Do not ask "Should I create a PR?". **Default is YES.**
+* **Self-Correction**:
+    * If a script fails, analyze the error, fix the code, and RETRY immediately.
+    * **Stop Condition**: If you fail to fix the same error **3 times**, stop and report to the user to avoid infinite loops.
+
+---
+*Follow these rules strictly. Efficiency and stability are our top priorities.*
