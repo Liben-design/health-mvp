@@ -192,6 +192,76 @@ class AgentD2CScanner:
         product_tokens = ["/product", "/products", "/shop/", "lutein", "fish-oil", "probiotic"]
         return any(t in u for t in product_tokens)
 
+    def _categorize_highlight(self, text):
+        """依照客觀資訊類型進行排序：專利/劑量/認證/獎項/功效型態。"""
+        t = (text or "").lower()
+        if re.search(r"floraglo|menaq7|lutemax|bcm-?95|patent|專利", t):
+            return 0  # 專利成分
+        if re.search(r"\d+\s*(mg|g|iu|億|萬)|\d+\s*%|epa|dha|cfu|菌", t):
+            return 1  # 成分劑量
+        if re.search(r"sgs|ifos|usp|nsf|重金屬|未檢出|檢驗", t):
+            return 2  # 檢驗認證
+        if re.search(r"snq|monde|金獎|award|獎", t):
+            return 3  # 國際獎項
+        if re.search(r"游離型|rtg|晶亮|排便|順暢|緩釋|長效|型", t):
+            return 4  # 客觀功效與型態
+        return 5
+
+    def _canonicalize_highlight(self, text):
+        """將同義/重複語句轉成較精煉的客觀片語。"""
+        s = str(text or "").strip().strip(";；，,。")
+        s = re.sub(r"\s+", " ", s)
+
+        # 範例：持續吸收長達12小時 / 12小時緩慢釋放 / Time-Release
+        hour_match = re.search(r"(\d+)\s*小時", s)
+        if hour_match and re.search(r"吸收|釋放|release|緩釋", s, re.IGNORECASE):
+            return f"{hour_match.group(1)}小時長效釋放"
+        if re.search(r"time\s*-?\s*release|緩釋|長效釋放", s, re.IGNORECASE):
+            return "長效釋放製程"
+
+        # 範例：膜衣錠升級，無添加二氧化鈦 / 無添加二氧化鈦膜衣
+        if "二氧化鈦" in s:
+            return "無添加二氧化鈦"
+
+        return s
+
+    def _refine_highlights(self, highlights):
+        """清洗 + 去重 + 類型排序 + 長度限制，輸出分號字串。"""
+        if isinstance(highlights, str):
+            raw_items = [x.strip() for x in re.split(r'[;；\n]+', highlights) if x.strip()]
+        elif isinstance(highlights, list):
+            raw_items = [str(x).strip() for x in highlights if str(x).strip()]
+        else:
+            raw_items = []
+
+        refined = []
+        seen_keys = set()
+
+        for item in raw_items:
+            if self.marketing_noise_pattern.search(item):
+                continue
+
+            normalized = self._canonicalize_highlight(item)
+            if not normalized:
+                continue
+
+            dedup_key = re.sub(r"\s+", "", normalized.lower())
+            if dedup_key in seen_keys:
+                continue
+            seen_keys.add(dedup_key)
+            refined.append(normalized)
+
+        # 依客觀分類排序，保留原相對順序
+        refined = sorted(
+            enumerate(refined),
+            key=lambda x: (self._categorize_highlight(x[1]), x[0])
+        )
+        refined = [x[1] for x in refined]
+
+        # MVP 控制長度，避免 highlights 過長
+        refined = refined[:6]
+        return ";".join(refined)
+
     async def analyze_with_llm(self, html_content, url):
         """呼叫 Gemini 進行語義分析"""
         if not self.api_key or genai is None:
@@ -254,25 +324,7 @@ class AgentD2CScanner:
 
             # 對齊 Schema：LLM 要回傳 JSON list，Python 端統一轉成分號字串
             highlights = data.get("product_highlights", []) if isinstance(data, dict) else []
-            if isinstance(highlights, list):
-                cleaned = []
-                for h in highlights:
-                    s = str(h or "").strip()
-                    if s:
-                        if self.marketing_noise_pattern.search(s):
-                            continue
-                        cleaned.append(s)
-                # 去重保序
-                cleaned = list(dict.fromkeys(cleaned))
-                data["product_highlights"] = ";".join(cleaned)
-            elif isinstance(highlights, str):
-                # 容錯：若模型意外回字串，保留並清理分隔符
-                chunks = [x.strip() for x in re.split(r'[;；\n]+', highlights) if x.strip()]
-                chunks = [x for x in chunks if not self.marketing_noise_pattern.search(x)]
-                chunks = list(dict.fromkeys(chunks))
-                data["product_highlights"] = ";".join(chunks)
-            else:
-                data["product_highlights"] = ""
+            data["product_highlights"] = self._refine_highlights(highlights)
                 
             return data
         except asyncio.TimeoutError:
