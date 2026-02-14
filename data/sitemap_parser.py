@@ -246,6 +246,10 @@ class SitemapParser:
         # 新增 'knowledge', 'about' 等常見非產品頁面
         self.exclude_patterns = ['/blog', '/news', '/article', '/page', '/about', '/contact', '/faq', '/terms', 
                                  '/collections/', '/category/', '/tag/', '/knowledge/', '/media/', '/policy/', '/account/', '/cart/', '/member/']
+        # 排除非核心語系/區域站路徑，避免掃到海外變體導致 URL 爆量
+        self.locale_exclude_paths = ['/en/', '/my/', '/sg/', '/macau/', '/hk/']
+        # 排除明顯非保健食品分類（若站台有此類路徑）
+        self.non_supplement_paths = ['/makeup/', '/skincare/']
 
     @staticmethod
     def _is_greencome_product_url(url):
@@ -303,6 +307,14 @@ class SitemapParser:
         u = url.lower()
         parsed = urlparse(u)
         host = parsed.netloc
+
+        # 0) 語系/區域站黑名單（先砍掉高噪音來源）
+        if any(x in u for x in self.locale_exclude_paths):
+            return False
+
+        # 0.1) 明顯非保健分類黑名單
+        if any(x in u for x in self.non_supplement_paths):
+            return False
         
         # [New] 0. 全域清洗規則 (針對悠活原力等)
         # 排除非 ASCII (亂碼/中文路徑)
@@ -450,9 +462,10 @@ def main():
             if row.get("domain") and row.get("brand"):
                 domains.append((row["brand"], row["domain"]))
 
-    # [測試模式] 僅處理前 5 個品牌進行校準
-    print(f"⚠️ 測試模式啟動：僅處理清單中的前 5 個品牌 (共 {len(domains)} 個)")
-    domains = domains[:5]
+    # [測試模式] 預設放寬到前 500 個品牌，避免過度截斷
+    test_top_n = int(os.environ.get("SITEMAP_TEST_TOP_N", "500"))
+    print(f"⚠️ 測試模式啟動：處理清單中的前 {test_top_n} 個品牌 (共 {len(domains)} 個)")
+    domains = domains[:test_top_n]
 
     # 平行處理 (加速)
     print(f"🚀 啟動 Sitemap 解析器，共 {len(domains)} 個目標...")

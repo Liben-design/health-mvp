@@ -125,11 +125,11 @@ def load_data(keywords=["葉黃素", "益生菌", "魚油"]):
         combined_df['brand'] = "未標示"
     else:
         combined_df['brand'] = combined_df['brand'].fillna("未標示").astype(str)
-    combined_df['tags'] = combined_df['tags'].fillna("")
-    
+
+    # Schema 對齊：新欄位為 product_highlights，兼容舊 CSV 的 tags
     if 'product_highlights' not in combined_df.columns:
-        combined_df['product_highlights'] = ""
-    combined_df['product_highlights'] = combined_df['product_highlights'].fillna("")
+        combined_df['product_highlights'] = combined_df.get('tags', "")
+    combined_df['product_highlights'] = combined_df['product_highlights'].fillna("").astype(str)
 
     # 圖片 URL 容錯處理：確保每個產品都有圖片，並修復 D2C 格式問題
     placeholder_img = "https://via.placeholder.com/300x200/f8f9fa/6c757d?text=VitaGuide"
@@ -188,7 +188,7 @@ with col3:
     top_brand = df['brand'].value_counts().idxmax()
     st.metric("產品最多品牌", top_brand)
 with col4:
-    free_form_count = df['tags'].str.contains("游離型").sum()
+    free_form_count = df['product_highlights'].str.contains("游離型", na=False).sum()
     st.metric("標榜「游離型」", f"{free_form_count} 項")
 
 st.divider()
@@ -223,11 +223,11 @@ if selected_brand != "全部":
     result = result[result['brand'] == selected_brand]
 
 if tag_filter == "💎FloraGLO 原料":
-    result = result[result['tags'].str.contains("FloraGLO", na=False)]
+    result = result[result['product_highlights'].str.contains("FloraGLO", na=False)]
 elif tag_filter == "✅游離型":
-    result = result[result['tags'].str.contains("游離型", na=False)]
+    result = result[result['product_highlights'].str.contains("游離型", na=False)]
 elif tag_filter == "➕含有蝦紅素":
-    result = result[result['tags'].str.contains("蝦紅素", na=False)]
+    result = result[result['product_highlights'].str.contains("蝦紅素", na=False)]
 
 # 排序邏輯
 if sort_option == "價格由低到高":
@@ -250,13 +250,13 @@ view_mode = st.radio("檢視模式", ["📊 表格模式 (快速比價)", "🖼�
 if "表格" in view_mode:
     # 使用 st.column_config.ImageColumn 來顯示圖片
     st.dataframe(
-        result[['image_url', 'brand', 'title', 'price', 'tags', 'url']],
+        result[['image_url', 'brand', 'title', 'price', 'product_highlights', 'url']],
         column_config={
             "image_url": st.column_config.ImageColumn("商品圖", help="產品預覽圖"),
             "brand": "品牌",
             "title": "產品名稱",
             "price": st.column_config.NumberColumn("價格", format="$%d"),
-            "tags": "規格亮點",
+            "product_highlights": "規格亮點",
             "url": st.column_config.LinkColumn("前往購買", display_text="前往購買")
         },
         use_container_width=True,
@@ -285,13 +285,13 @@ else:
                     st.markdown(f"<span style='color:orange;'>💸 (每顆 ${row['unit_price']:.2f})</span>", unsafe_allow_html=True)
 
                 # 顯示標籤膠囊
-                tags = row['tags'].split(" ") if row['tags'] else []
-                if tags:
-                    st.markdown(" ".join([f"`{t}`" for t in tags]))
+                highlights = [t.strip() for t in str(row['product_highlights']).split(";") if t.strip()]
+                if highlights:
+                    st.markdown(" ".join([f"`{t}`" for t in highlights]))
 
                 # 顯示 AI 分析亮點
                 if row['product_highlights']:
-                    highlights = str(row['product_highlights']).split(";")
-                    st.caption(" • ".join(highlights[:3]))
+                    top_highlights = [t.strip() for t in str(row['product_highlights']).split(";") if t.strip()]
+                    st.caption(" • ".join(top_highlights[:3]))
 
                 st.markdown("---")
